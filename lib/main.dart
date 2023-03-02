@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 void main() {
   runApp(const MyApp());
@@ -101,6 +104,46 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            Container(
+              height: 600,
+              child: FlutterMap(
+                  options: MapOptions(
+                    center: LatLng(44.93804, -93.16838),
+                    zoom: 13,
+                  ),
+                  nonRotatedChildren: [
+                    AttributionWidget.defaultWidget(
+                      source: 'OpenStreetMap contributors',
+                      onSourceTapped: null,
+                    ),
+                  ],
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                          'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
+                      subdomains: ['a', 'b', 'c'],
+                      userAgentPackageName: 'com.example.app',
+                    ),
+                    MarkerLayer(markers: [
+                      Marker(
+                        builder: (ctx) => Image.asset('assets/bus-stop.png'),
+                        point: LatLng(44.940063, -93.167231),
+                      ),
+                      Marker(
+                        builder: (ctx) => Image.asset('assets/bus-stop.png'),
+                        point: LatLng(44.940139, -93.167496),
+                      ),
+                      Marker(
+                        builder: (ctx) => Image.asset('assets/bus-stop.png'),
+                        point: LatLng(44.939766, -93.167117),
+                      ),
+                      Marker(
+                        builder: (ctx) => Image.asset('assets/bus-stop.png'),
+                        point: LatLng(44.939760, -93.166927),
+                      ),
+                    ])
+                  ]),
             ),
           ],
         ),
