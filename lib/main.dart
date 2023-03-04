@@ -98,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             Container(
-              height: 600,
+              height: 400,
               child: FlutterMap(
                   options: MapOptions(
                     center: LatLng(44.93804, -93.16838),
@@ -137,6 +137,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     ])
                   ]),
             ),
+            Container(
+              height:260,
+              color:Color.fromARGB(255, 255, 0, 0),
+            )
           ],
         ),
       ),
