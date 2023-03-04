@@ -2,8 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
 
-void main() {
+void main() async {
+  await dart_gtfs.printClosestBus();
   runApp(const MyApp());
 }
 
@@ -137,10 +139,17 @@ class _MyHomePageState extends State<MyHomePage> {
                     ])
                   ]),
             ),
-            Container(
-              height:260,
-              color:Color.fromARGB(255, 255, 0, 0),
-            )
+            BusWidget()
+            // Container(
+            //   height: 260,
+            //   color: Color.fromARGB(255, 255, 0, 0),
+            //   child: FutureBuilder(
+            //     future: dart_gtfs.pullClosestBus()
+            //     builder: (context, snapshot) {
+            //       return Text(await dart_gtfs.pullClosestBus());
+            //     },
+            //   // ,Text(await dart_gtfs.pullClosestBus());
+            // )
           ],
         ),
       ),
@@ -149,6 +158,37 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class BusWidget extends StatefulWidget {
+  const BusWidget({super.key});
+
+  @override
+  State<BusWidget> createState() => _BusWidgetState();
+}
+
+class _BusWidgetState extends State<BusWidget> {
+  final Future<String> busOutput = dart_gtfs.pullClosestBus();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String>(
+      future: busOutput,
+      builder: (context, snapshot) {
+        List<Widget> children;
+        if (snapshot.hasData) {
+          children = <Widget>[Text(snapshot.data!)];
+        } else {
+          children = <Widget>[Text("Error")];
+        }
+        return Center(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: children,
+        ));
+      },
     );
   }
 }
