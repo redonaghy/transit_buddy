@@ -30,13 +30,8 @@ Future<String> pullClosestBus() async {
                 LatLng(entity.vehicle.position.latitude,
                     entity.vehicle.position.longitude)) /
             1000;
-        // double distanceToBus = Distance().distance(
-        //     currentLocation,
-        //     LatLng(entity.vehicle.position.latitude,
-        //         entity.vehicle.position.longitude));
         String output =
             "Route ${entity.vehicle.trip.routeId} - ${distanceToBus} km away";
-        // "Route ${entity.vehicle.trip.routeId}, currently at ${entity.vehicle.position.latitude}, ${entity.vehicle.position.longitude}";
         return Future.delayed(const Duration(seconds: 0), () => output);
       }
     }

@@ -144,16 +144,6 @@ class _MyHomePageState extends State<MyHomePage> {
               children: <Widget>[BusWidget()],
               mainAxisAlignment: MainAxisAlignment.end,
             )
-            // Container(
-            //   height: 260,
-            //   color: Color.fromARGB(255, 255, 0, 0),
-            //   child: FutureBuilder(
-            //     future: dart_gtfs.pullClosestBus()
-            //     builder: (context, snapshot) {
-            //       return Text(await dart_gtfs.pullClosestBus());
-            //     },
-            //   // ,Text(await dart_gtfs.pullClosestBus());
-            // )
           ],
         ),
       ),
@@ -166,6 +156,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+/*
+* This widget is the block at the bottom that will hold bus info.
+* Currently, it only takes a string for a single bus and populates a VehicleRow with that string.
+*
+*/
 class BusWidget extends StatefulWidget {
   const BusWidget({super.key});
 
@@ -178,13 +173,19 @@ class _BusWidgetState extends State<BusWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // A FutureBuilder is a widget that displays one widget if there is currently
+    // output from a Future object (our bus data that takes a second to load), and
+    // another widget if there is not (loading icon, for example)
     return FutureBuilder<String>(
       future: busOutput,
       builder: (context, snapshot) {
         List<Widget> children;
         if (snapshot.hasData) {
+          // snapshot.data is the string returned from dart_gtfs.pullClosestBus()
           children = <Widget>[VehicleRow(busInfo: snapshot.data!)];
         } else {
+          // "No data found" is shown when the data from dart_gtfs.pullClosestBus()
+          // has not been retrieved from the internet yet
           children = <Widget>[
             VehicleRow(
               busInfo: "No data found",
@@ -201,6 +202,11 @@ class _BusWidgetState extends State<BusWidget> {
   }
 }
 
+/*
+* This widget returns a single row that contains a bus icon and then text. Currently it only
+* takes a single String parameter and puts this into the text object.
+*
+*/
 class VehicleRow extends StatefulWidget {
   const VehicleRow({
     super.key,
