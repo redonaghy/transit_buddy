@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
+import 'package:latlong2/latlong.dart';
 
 String vehicleInfoString(FeedEntity entity) {
   return """Vehicle Information for Vehicle #${entity.vehicle.vehicle.label}
@@ -19,11 +20,24 @@ Future<String> pullClosestBus() async {
 
   if (response.statusCode == 200) {
     final feedMessage = FeedMessage.fromBuffer(response.bodyBytes);
+    LatLng currentLocation = LatLng(
+        44.93994, -93.16715); // Placeholder: Snelling & Grand A Line Bus Stop
     for (final entity in feedMessage.entity) {
       if (entity.vehicle.trip.routeId == "921") {
-        String string =
-            "A Line | Vehicle ID ${entity.id}, currently at ${entity.vehicle.position.latitude}, ${entity.vehicle.position.longitude}";
-        return Future.delayed(const Duration(seconds: 0), () => string);
+        double distanceToBus = DistanceVincenty().as(
+                LengthUnit.Meter,
+                currentLocation,
+                LatLng(entity.vehicle.position.latitude,
+                    entity.vehicle.position.longitude)) /
+            1000;
+        // double distanceToBus = Distance().distance(
+        //     currentLocation,
+        //     LatLng(entity.vehicle.position.latitude,
+        //         entity.vehicle.position.longitude));
+        String output =
+            "Route ${entity.vehicle.trip.routeId} - ${distanceToBus} km away";
+        // "Route ${entity.vehicle.trip.routeId}, currently at ${entity.vehicle.position.latitude}, ${entity.vehicle.position.longitude}";
+        return Future.delayed(const Duration(seconds: 0), () => output);
       }
     }
     return Future.delayed(const Duration(seconds: 0), () => "Fetch failed");
@@ -46,18 +60,21 @@ void main() async {
   if (response.statusCode == 200) {
     // Code after successful HTTP request
     final feedMessage = FeedMessage.fromBuffer(response.bodyBytes);
-    print('Number of entities: ${feedMessage.entity.length}.');
+    // print('Number of entities: ${feedMessage.entity.length}.');
 
-    var aLineOutput = File('current_aline_info.txt');
-    var sink = aLineOutput.openWrite();
+    // var aLineOutput = File('current_aline_info.txt');
+    // var sink = aLineOutput.openWrite();
 
-    for (final entity in feedMessage.entity) {
-      if (entity.vehicle.trip.routeId == "921") {
-        sink.write(vehicleInfoString(entity));
-      }
-    }
+    // for (final entity in feedMessage.entity) {
+    //   if (entity.vehicle.trip.routeId == "921") {
+    //     sink.write(vehicleInfoString(entity));
+    //   }
+    // }
 
-    sink.close();
+    var map = feedMessage.writeToJsonMap();
+    print(map["1"]);
+
+    // sink.close();
     // print(vehicleInfoString(feedMessage.entity.elementAt(1)));
   } else {
     print('Request failed with status: ${response.statusCode}.');

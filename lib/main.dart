@@ -5,7 +5,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
 
 void main() async {
-  await dart_gtfs.printClosestBus();
+  // await dart_gtfs.printClosestBus();
+  // dart_gtfs.main();
   runApp(const MyApp());
 }
 
@@ -139,7 +140,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     ])
                   ]),
             ),
-            BusWidget()
+            Column(
+              children: <Widget>[BusWidget()],
+              mainAxisAlignment: MainAxisAlignment.end,
+            )
             // Container(
             //   height: 260,
             //   color: Color.fromARGB(255, 255, 0, 0),
@@ -179,9 +183,13 @@ class _BusWidgetState extends State<BusWidget> {
       builder: (context, snapshot) {
         List<Widget> children;
         if (snapshot.hasData) {
-          children = <Widget>[Text(snapshot.data!)];
+          children = <Widget>[VehicleRow(busInfo: snapshot.data!)];
         } else {
-          children = <Widget>[Text("Error")];
+          children = <Widget>[
+            VehicleRow(
+              busInfo: "No data found",
+            )
+          ];
         }
         return Center(
             child: Column(
@@ -189,6 +197,36 @@ class _BusWidgetState extends State<BusWidget> {
           children: children,
         ));
       },
+    );
+  }
+}
+
+class VehicleRow extends StatefulWidget {
+  const VehicleRow({
+    super.key,
+    required this.busInfo,
+  });
+
+  final String busInfo;
+
+  @override
+  State<VehicleRow> createState() => _VehicleRowState();
+}
+
+class _VehicleRowState extends State<VehicleRow> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Icon(Icons.bus_alert),
+          ),
+          Text(widget.busInfo)
+        ],
+      ),
     );
   }
 }
