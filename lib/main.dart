@@ -120,6 +120,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       subdomains: ['a', 'b', 'c'],
                       userAgentPackageName: 'com.example.app',
                     ),
+                    // This MarkerLayer has a parameter markers that is a list of Markers;
+                    // for now this contains 4 bus stop locations I hard coded in but
+                    // eventually the list will be automatically populated for us using
+                    // GTFS data.
                     MarkerLayer(markers: [
                       Marker(
                         builder: (ctx) => Image.asset('assets/bus-stop.png'),
@@ -140,6 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ])
                   ]),
             ),
+            // This column contains the BusWidget which displays incoming buses.
             Column(
               children: <Widget>[BusWidget()],
               mainAxisAlignment: MainAxisAlignment.end,
@@ -157,9 +162,12 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 /*
-* This widget is the block at the bottom that will hold bus info.
-* Currently, it only takes a string for a single bus and populates a VehicleRow with that string.
-*
+This widget is the block at the bottom that will hold bus info.
+Currently, it only takes the string output from pullClosestBus() and makes a single
+VehicleRow widget with it. To do this, it uses a FutureBuilder widget which has
+two states depending on whether bus data has been received or not. If received,
+it makes a VehicleRow widget with proper information. If not received yet, it makes
+a widget that says "Loading..."
 */
 class BusWidget extends StatefulWidget {
   const BusWidget({super.key});
@@ -180,15 +188,16 @@ class _BusWidgetState extends State<BusWidget> {
       future: busOutput,
       builder: (context, snapshot) {
         List<Widget> children;
+        // snapshot.hasData is only true when we successfully retrieve GTFS data
         if (snapshot.hasData) {
           // snapshot.data is the string returned from dart_gtfs.pullClosestBus()
           children = <Widget>[VehicleRow(busInfo: snapshot.data!)];
         } else {
-          // "No data found" is shown when the data from dart_gtfs.pullClosestBus()
+          // "Loading" is shown when the data from dart_gtfs.pullClosestBus()
           // has not been retrieved from the internet yet
           children = <Widget>[
             VehicleRow(
-              busInfo: "No data found",
+              busInfo: "Loading...",
             )
           ];
         }
@@ -203,13 +212,14 @@ class _BusWidgetState extends State<BusWidget> {
 }
 
 /*
-* This widget returns a single row that contains a bus icon and then text. Currently it only
-* takes a single String parameter and puts this into the text object.
-*
+This widget returns a single row that contains a bus icon and then text. Currently it only
+takes a single String parameter and puts this into the text object. May change. Widgets may
+be wrapped with Padding() for aesthetic purposes.
 */
 class VehicleRow extends StatefulWidget {
   const VehicleRow({
     super.key,
+    // This is the String parameter that decided the text in the widget.
     required this.busInfo,
   });
 
@@ -224,6 +234,7 @@ class _VehicleRowState extends State<VehicleRow> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
+      // The Row widget means the bus icon and text are side-by-side
       child: Row(
         children: [
           Padding(
