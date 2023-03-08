@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       title: 'Transit Buddy =)',
       theme: ThemeData(
         // This is the theme of your application.
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.red,
       ),
       home: const MyHomePage(title: 'Transit Buddy =) Home Page'),
     );
