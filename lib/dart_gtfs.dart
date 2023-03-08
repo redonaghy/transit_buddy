@@ -17,7 +17,7 @@ String vehicleInfoString(FeedEntity entity) {
 This function currently finds a random A-Line bus and returns a string containing its distance from a bus stop.
 I'd like for it to actually return the closest A-Line to the bus stop
 */
-Future<String> pullClosestBus() async {
+Future<FeedEntity> pullClosestBus() async {
   final url =
       Uri.parse('https://svc.metrotransit.org/mtgtfs/vehiclepositions.pb');
   final response = await http.get(url);
@@ -25,36 +25,34 @@ Future<String> pullClosestBus() async {
   // response.statusCode == 200 means fetching the protocol buffer was successful
   if (response.statusCode == 200) {
     final feedMessage = FeedMessage.fromBuffer(response.bodyBytes);
-    // currentLocation is a placeholder location for the Snelling & Grand A-Line bus stop.
-    // As a first step we'll just be trying to measure distance from here to the vehicles.
-    LatLng currentLocation = LatLng(
-        44.93994, -93.16715);
+    // This is our hard-coded example bus stop to check distances with.
+    LatLng currentLocation = LatLng(44.93994, -93.16715);
     // feedMessage.entity is a list of FeedEntity objects, which represent the vehicles
     for (final entity in feedMessage.entity) {
       if (entity.vehicle.trip.routeId == "921") {
-        // this chunk of code for distanceToBus finds lat/long distance between currentLocation (bus stop)
-        // and a single vehicle
-        double distanceToBus = DistanceHaversine().as(
-                LengthUnit.Meter,
-                currentLocation,
-                LatLng(entity.vehicle.position.latitude,
-                    entity.vehicle.position.longitude)) /
-            1000;
-        // right now it just makes a string and returns it for the first A-line bus it sees. I'd like for it
-        // to do this only for the closest bus. One idea I was thinking was making a map/dictionary where the
-        // key is the FeedEntity object (represented as entity in this loop) and the value is the distance,
-        // where you can just copy the code above. Then, somehow sorting that dictionary by the values (distance).
-        // This task would be more of a data structures thing.
-        String output =
-            "Route ${entity.vehicle.trip.routeId} - ${distanceToBus} km away";
-        
-        return Future.delayed(const Duration(seconds: 0), () => output);
+        // Right now, the function actually just returns the first A-Line it finds,
+        // not the closest one. This is where the code would go that adds all
+        // the A-Lines in a list. Then after the for loop, it would get sorted
+        // by distance to the bus stop. Ideas for doing this could be using Lists's
+        // .sort method and comparing by distance, or putting the entities into
+        // a dictionary with key entity and value distance and sorting by distance.
+
+        return Future.delayed(const Duration(seconds: 0), () => entity);
       }
     }
-    return Future.delayed(const Duration(seconds: 0), () => "Fetch failed");
+    // return Future.delayed(const Duration(seconds: 0), () => "Fetch failed");
+
+    // These bottom two return statements are potential problems. Basically if the
+    // http request fails (no connection) I STILL have to return a FeedEntity (vehicle),
+    // bc thats the return type and I think Flutter won't like returning null, so
+    // I'm currently just returning a fake FeedEntity with id null. Might want to change
+    // this down the line cause it might result in "ghost" buses at latlong 0,0 if
+    // a network request fails which would be weird.
+    return Future.delayed(
+        const Duration(seconds: 0), () => FeedEntity(id: "NULL"));
   }
   return Future.delayed(
-      const Duration(seconds: 0), () => "Network connection failed");
+      const Duration(seconds: 0), () => FeedEntity(id: "NULL"));
 }
 
 // Just a function that prints for debugging purposes

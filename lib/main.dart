@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
 
 void main() async {
@@ -47,6 +48,26 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  Future<FeedEntity> closestBus = dart_gtfs.pullClosestBus();
+  // Pre-populates map with some hard-coded bus stops
+  List<Marker> markerList = [
+    Marker(
+      builder: (ctx) => Image.asset('assets/bus-stop.png'),
+      point: LatLng(44.940063, -93.167231),
+    ),
+    Marker(
+      builder: (ctx) => Image.asset('assets/bus-stop.png'),
+      point: LatLng(44.940139, -93.167496),
+    ),
+    Marker(
+      builder: (ctx) => Image.asset('assets/bus-stop.png'),
+      point: LatLng(44.939766, -93.167117),
+    ),
+    Marker(
+      builder: (ctx) => Image.asset('assets/bus-stop.png'),
+      point: LatLng(44.939760, -93.166927),
+    ),
+  ];
 
   void _incrementCounter() {
     setState(() {
@@ -67,6 +88,19 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
+    // If pullClosestBus() http request is complete, add marker for that bus
+    closestBus.then((value) {
+      markerList.add(Marker(
+        builder: (ctx) => const Icon(Icons.bus_alert),
+        point: LatLng(
+            value.vehicle.position.latitude, value.vehicle.position.longitude),
+      ));
+      setState(() {});
+    });
+
+    // This scaffold that is returned makes up the entire home page; its children
+    // is all the elements in our app like map, text, etc.
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
@@ -105,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: FlutterMap(
                   options: MapOptions(
                     center: LatLng(44.93804, -93.16838),
-                    zoom: 13,
+                    zoom: 10,
                   ),
                   nonRotatedChildren: [
                     AttributionWidget.defaultWidget(
@@ -124,29 +158,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     // for now this contains 4 bus stop locations I hard coded in but
                     // eventually the list will be automatically populated for us using
                     // GTFS data.
-                    MarkerLayer(markers: [
-                      Marker(
-                        builder: (ctx) => Image.asset('assets/bus-stop.png'),
-                        point: LatLng(44.940063, -93.167231),
-                      ),
-                      Marker(
-                        builder: (ctx) => Image.asset('assets/bus-stop.png'),
-                        point: LatLng(44.940139, -93.167496),
-                      ),
-                      Marker(
-                        builder: (ctx) => Image.asset('assets/bus-stop.png'),
-                        point: LatLng(44.939766, -93.167117),
-                      ),
-                      Marker(
-                        builder: (ctx) => Image.asset('assets/bus-stop.png'),
-                        point: LatLng(44.939760, -93.166927),
-                      ),
-                    ])
+                    MarkerLayer(
+                      // Our markerList is pre-built with bus & stop locations
+                      markers: markerList,
+                    ),
                   ]),
             ),
-            // This column contains the BusWidget which displays incoming buses.
+            // This column contains the BusWidget which handles the
+            // rows with info for incoming buses.
             Column(
-              children: <Widget>[BusWidget()],
+              children: <Widget>[BusWidget(busInfo: closestBus)],
               mainAxisAlignment: MainAxisAlignment.end,
             )
           ],
@@ -162,59 +183,42 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 /*
-This widget is the block at the bottom that will hold bus info.
-Currently, it only takes the string output from pullClosestBus() and makes a single
-VehicleRow widget with it. To do this, it uses a FutureBuilder widget which has
-two states depending on whether bus data has been received or not. If received,
-it makes a VehicleRow widget with proper information. If not received yet, it makes
-a widget that says "Loading..."
+This widget is the block at the bottom that holds bus info. Currently, it contains
+one row of info for one bus. It takes one Future<FeedEntity> object and uses it
+to create on VehicleRow widget with the info from that.
 */
 class BusWidget extends StatefulWidget {
-  const BusWidget({super.key});
+  const BusWidget({
+    super.key,
+    // This is the String parameter that decided the text in the widget.
+    required this.busInfo,
+  });
+
+  final Future<FeedEntity> busInfo;
 
   @override
   State<BusWidget> createState() => _BusWidgetState();
 }
 
 class _BusWidgetState extends State<BusWidget> {
-  final Future<String> busOutput = dart_gtfs.pullClosestBus();
+  // final Future<String> busOutput = dart_gtfs.pullClosestBus();
 
   @override
   Widget build(BuildContext context) {
     // A FutureBuilder is a widget that displays one widget if there is currently
     // output from a Future object (our bus data that takes a second to load), and
     // another widget if there is not (loading icon, for example)
-    return FutureBuilder<String>(
-      future: busOutput,
-      builder: (context, snapshot) {
-        List<Widget> children;
-        // snapshot.hasData is only true when we successfully retrieve GTFS data
-        if (snapshot.hasData) {
-          // snapshot.data is the string returned from dart_gtfs.pullClosestBus()
-          children = <Widget>[VehicleRow(busInfo: snapshot.data!)];
-        } else {
-          // "Loading" is shown when the data from dart_gtfs.pullClosestBus()
-          // has not been retrieved from the internet yet
-          children = <Widget>[
-            VehicleRow(
-              busInfo: "Loading...",
-            )
-          ];
-        }
-        return Center(
-            child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: children,
-        ));
-      },
-    );
+    return Center(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[VehicleRow(busInfo: widget.busInfo)]));
   }
 }
 
 /*
-This widget returns a single row that contains a bus icon and then text. Currently it only
-takes a single String parameter and puts this into the text object. May change. Widgets may
-be wrapped with Padding() for aesthetic purposes.
+This widget returns a single row that contains a bus icon and then text. Currently
+it takes a Future<FeedEntity>, and says "Loading..." when data hasn't loaded and
+displays bus route and distance when it has loaded.
 */
 class VehicleRow extends StatefulWidget {
   const VehicleRow({
@@ -223,7 +227,7 @@ class VehicleRow extends StatefulWidget {
     required this.busInfo,
   });
 
-  final String busInfo;
+  final Future<FeedEntity> busInfo;
 
   @override
   State<VehicleRow> createState() => _VehicleRowState();
@@ -241,7 +245,26 @@ class _VehicleRowState extends State<VehicleRow> {
             padding: const EdgeInsets.only(right: 8),
             child: Icon(Icons.bus_alert),
           ),
-          Text(widget.busInfo)
+          // The future builder builds two different widgets depending on if
+          // the http request for pullClosestBus() has finished. If it hasn't,
+          // it builds text that says "Loading...", and otherwise returns text
+          // with route & distance.
+          FutureBuilder(
+              future: widget.busInfo,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  LatLng currentLocation = LatLng(44.93994, -93.16715);
+                  double distanceToBus = DistanceHaversine().as(
+                          LengthUnit.Meter,
+                          currentLocation,
+                          LatLng(snapshot.data!.vehicle.position.latitude,
+                              snapshot.data!.vehicle.position.longitude)) /
+                      1000;
+                  return Text(
+                      "Route ${snapshot.data!.vehicle.trip.routeId} - ${distanceToBus} km away");
+                } else
+                  return Text("Loading...");
+              }),
         ],
       ),
     );
