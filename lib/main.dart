@@ -47,7 +47,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   Future<FeedEntity> closestBus = dart_gtfs.pullClosestBus();
   // Pre-populates map with some hard-coded bus stops
   List<Marker> markerList = [
@@ -68,17 +67,6 @@ class _MyHomePageState extends State<MyHomePage> {
       point: LatLng(44.939760, -93.166927),
     ),
   ];
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -127,13 +115,6 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
             Container(
               height: 400,
               child: FlutterMap(
@@ -169,14 +150,9 @@ class _MyHomePageState extends State<MyHomePage> {
             Column(
               children: <Widget>[BusWidget(busInfo: closestBus)],
               mainAxisAlignment: MainAxisAlignment.end,
-            )
+            ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
