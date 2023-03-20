@@ -153,7 +153,12 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+      floatingActionButton: const FloatingActionButton(
+        onPressed: dart_gtfs.pullClosestBus,
+        tooltip: 'Refresh',
+        child: Icon(Icons.add),
+      ),
     );
   }
 }
