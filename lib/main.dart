@@ -49,7 +49,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   Future<FeedEntity> closestBus = dart_gtfs.pullClosestBus();
   // Pre-populates map with some hard-coded bus stops
-  List<Marker> markerList = [
+  List<Marker> stopMarkerList = [
     Marker(
       builder: (ctx) => Image.asset('assets/bus-stop.png'),
       point: LatLng(44.940063, -93.167231),
@@ -68,6 +68,24 @@ class _MyHomePageState extends State<MyHomePage> {
     ),
   ];
 
+  List<Marker> busMarkerList = [];
+
+  refreshCallback() {
+    Future<FeedEntity> newBus = dart_gtfs.pullClosestBus();
+    newBus.then((value) {
+      setState(() {
+        busMarkerList = [
+          Marker(
+            builder: (ctx) => const Icon(Icons.bus_alert),
+            point: LatLng(value.vehicle.position.latitude,
+                value.vehicle.position.longitude),
+          )
+        ];
+      });
+    });
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -79,11 +97,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // If pullClosestBus() http request is complete, add marker for that bus
     closestBus.then((value) {
-      markerList.add(Marker(
+      var bus = Marker(
         builder: (ctx) => const Icon(Icons.bus_alert),
         point: LatLng(
             value.vehicle.position.latitude, value.vehicle.position.longitude),
-      ));
+      );
+      stopMarkerList.add(bus);
       setState(() {});
     });
 
@@ -141,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     // GTFS data.
                     MarkerLayer(
                       // Our markerList is pre-built with bus & stop locations
-                      markers: markerList,
+                      markers: stopMarkerList,
                     ),
                   ]),
             ),
@@ -155,9 +174,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: const FloatingActionButton(
-        onPressed: dart_gtfs.pullClosestBus,
+        onPressed:() => ,
         tooltip: 'Refresh',
-        child: Icon(Icons.add),
+        child: Icon(Icons.refresh),
       ),
     );
   }
