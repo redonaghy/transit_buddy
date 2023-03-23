@@ -14,20 +14,20 @@ String vehicleInfoString(FeedEntity entity) {
 }
 
 FeedEntity closestBus(List<FeedEntity> buses) {
-    // FeedEntity closestBus = buses[0];
-    // for(FeedEntity bus in buses) {
-    //   if() {
-    //     closestBus = bus;
-    //   }
-    // }
-    return buses[0];
+  // FeedEntity closestBus = buses[0];
+  // for(FeedEntity bus in buses) {
+  //   if() {
+  //     closestBus = bus;
+  //   }
+  // }
+  return buses[0];
 }
 
 /*
 This function currently finds a random A-Line bus and returns a string containing its distance from a bus stop.
 I'd like for it to actually return the closest A-Line to the bus stop
 */
-Future<FeedEntity> pullClosestBus() async {
+Future<List<FeedEntity>> pullClosestBus() async {
   final url =
       Uri.parse('https://svc.metrotransit.org/mtgtfs/vehiclepositions.pb');
   final response = await http.get(url);
@@ -50,7 +50,7 @@ Future<FeedEntity> pullClosestBus() async {
         buses.add(entity);
       }
     }
-    return Future.delayed(const Duration(seconds: 0), () => closestBus(buses));
+    return Future.delayed(const Duration(seconds: 0), () => buses);
     // return Future.delayed(const Duration(seconds: 0), () => "Fetch failed");
 
     // These bottom two return statements are potential problems. Basically if the
@@ -62,8 +62,8 @@ Future<FeedEntity> pullClosestBus() async {
     // return Future.delayed(
     //     const Duration(seconds: 0), () => FeedEntity(id: "NULL"));
   }
-  return Future.delayed(
-      const Duration(seconds: 0), () => FeedEntity(id: "NULL"));
+  List<FeedEntity> buses = [];
+  return Future.delayed(const Duration(seconds: 0), () => buses);
 }
 
 // Just a function that prints for debugging purposes

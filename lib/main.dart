@@ -47,7 +47,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Future<FeedEntity> closestBus = dart_gtfs.pullClosestBus();
+  Future<List<FeedEntity>> busesList = dart_gtfs.pullClosestBus();
   // Pre-populates map with some hard-coded bus stops
   List<Marker> stopMarkerList = [
     Marker(
@@ -71,16 +71,17 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Marker> busMarkerList = [];
 
   refreshCallback() {
-    Future<FeedEntity> newBus = dart_gtfs.pullClosestBus();
+    Future<List<FeedEntity>> newBus = dart_gtfs.pullClosestBus();
     newBus.then((value) {
       setState(() {
-        busMarkerList = [
-          Marker(
+        busMarkerList = [];
+        for (FeedEntity vehicle in value) {
+          busMarkerList.add(Marker(
+            point: LatLng(vehicle.vehicle.position.latitude,
+                vehicle.vehicle.position.longitude),
             builder: (ctx) => const Icon(Icons.bus_alert),
-            point: LatLng(value.vehicle.position.latitude,
-                value.vehicle.position.longitude),
-          )
-        ];
+          ));
+        }
       });
     });
     setState(() {});
@@ -96,13 +97,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
 
     // If pullClosestBus() http request is complete, add marker for that bus
-    closestBus.then((value) {
-      var bus = Marker(
-        builder: (ctx) => const Icon(Icons.bus_alert),
-        point: LatLng(
-            value.vehicle.position.latitude, value.vehicle.position.longitude),
-      );
-      stopMarkerList.add(bus);
+    busesList.then((value) {
+      for (FeedEntity vehicle in value) {
+        stopMarkerList.add(Marker(
+          builder: (ctx) => const Icon(Icons.bus_alert),
+          point: LatLng(vehicle.vehicle.position.latitude,
+              vehicle.vehicle.position.longitude),
+        ));
+      }
       setState(() {});
     });
 
@@ -167,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
             // This column contains the BusWidget which handles the
             // rows with info for incoming buses.
             Column(
-              children: <Widget>[BusWidget(busInfo: closestBus)],
+              children: <Widget>[BusWidget(busInfo: busesList)],
               mainAxisAlignment: MainAxisAlignment.end,
             ),
           ],
@@ -194,20 +196,32 @@ class BusWidget extends StatefulWidget {
     required this.busInfo,
   });
 
-  final List<Future<FeedEntity>> busInfo;
+  final Future<List<FeedEntity>> busInfo;
 
   @override
   State<BusWidget> createState() => _BusWidgetState();
 }
 
 class _BusWidgetState extends State<BusWidget> {
-  List<Widget> vehicleRowList(List<Future<FeedEntity>> busList) {
+  late Future<List<FeedEntity>> feedEntityList = widget.busInfo;
+  List<Widget> vehicleRowList(Future<List<FeedEntity>> busList) {
     List<Widget> vehicleRowList = [];
-    for (Future<FeedEntity> entity in widget.busInfo) {
-      vehicleRowList.add(VehicleRow(busInfo: entity));
-    }
+    busList.then(
+      (value) {
+        for (FeedEntity entity in value) {
+          vehicleRowList.add(VehicleRow(busInfo: entity));
+        }
+      },
+    );
     return vehicleRowList;
   }
+  // List<Widget> vehicleRowList(List<Future<FeedEntity>> busList) {
+  //   List<Widget> vehicleRowList = [];
+  //   for (Future<FeedEntity> entity in widget.busInfo) {
+  //     vehicleRowList.add(VehicleRow(busInfo: entity));
+  //   }
+  //   return vehicleRowList;
+  // }
   // final Future<String> busOutput = dart_gtfs.pullClosestBus();
 
   @override
@@ -218,10 +232,8 @@ class _BusWidgetState extends State<BusWidget> {
     return Center(
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: vehicleRowList(widget.busInfo)
-        )
-      );
-            // children: <Widget>[VehicleRow(busInfo: widget.busInfo)]));
+            children: vehicleRowList(widget.busInfo)));
+    // children: <Widget>[VehicleRow(busInfo: widget.busInfo)]));
   }
 }
 
@@ -237,7 +249,8 @@ class VehicleRow extends StatefulWidget {
     required this.busInfo,
   });
 
-  final Future<FeedEntity> busInfo;
+  // final Future<FeedEntity> busInfo;
+  final FeedEntity busInfo;
 
   @override
   State<VehicleRow> createState() => _VehicleRowState();
@@ -259,22 +272,24 @@ class _VehicleRowState extends State<VehicleRow> {
           // the http request for pullClosestBus() has finished. If it hasn't,
           // it builds text that says "Loading...", and otherwise returns text
           // with route & distance.
-          FutureBuilder(
-              future: widget.busInfo,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  LatLng currentLocation = LatLng(44.93994, -93.16715);
-                  double distanceToBus = DistanceHaversine().as(
-                          LengthUnit.Meter,
-                          currentLocation,
-                          LatLng(snapshot.data!.vehicle.position.latitude,
-                              snapshot.data!.vehicle.position.longitude)) /
-                      1000;
-                  return Text(
-                      "Route ${snapshot.data!.vehicle.trip.routeId} - ${distanceToBus} km away");
-                } else
-                  return Text("Loading...");
-              }),
+          // FutureBuilder(
+          //     future: widget.busInfo,
+          //     builder: (context, snapshot) {
+          //       if (snapshot.hasData) {
+          //         LatLng currentLocation = LatLng(44.93994, -93.16715);
+          //         double distanceToBus = DistanceHaversine().as(
+          //                 LengthUnit.Meter,
+          //                 currentLocation,
+          //                 LatLng(snapshot.data!.vehicle.position.latitude,
+          //                     snapshot.data!.vehicle.position.longitude)) /
+          //             1000;
+          //         return Text(
+          //             "Route ${snapshot.data!.vehicle.trip.routeId} - ${distanceToBus} km away");
+          //       } else
+          //         return Text("Loading...");
+          //     }),
+          Text(
+              "Route ${widget.busInfo.vehicle.trip.routeId} - ${DistanceHaversine().as(LengthUnit.Meter, LatLng(44.93994, -93.16715), LatLng(widget.busInfo.vehicle.position.latitude, widget.busInfo.vehicle.position.longitude)) / 1000} km away"),
         ],
       ),
     );
