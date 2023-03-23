@@ -69,7 +69,7 @@ Future<FeedEntity> pullClosestBus() async {
 // Just a function that prints for debugging purposes
 Future<void> printClosestBus() async {
   var output = await pullClosestBus();
-  print(output);
+  // print(output);
 }
 
 // Left over code from first attempting the HTTP request. Keeping this for now just for educational purposes.

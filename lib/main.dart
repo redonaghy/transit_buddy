@@ -173,11 +173,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: const FloatingActionButton(
-        onPressed:() => ,
-        tooltip: 'Refresh',
-        child: Icon(Icons.refresh),
-      ),
+      // floatingActionButton: const FloatingActionButton(
+      //   onPressed:() => ,
+      //   tooltip: 'Refresh',
+      //   child: Icon(Icons.refresh),
+      // ),
     );
   }
 }
@@ -194,13 +194,20 @@ class BusWidget extends StatefulWidget {
     required this.busInfo,
   });
 
-  final Future<FeedEntity> busInfo;
+  final List<Future<FeedEntity>> busInfo;
 
   @override
   State<BusWidget> createState() => _BusWidgetState();
 }
 
 class _BusWidgetState extends State<BusWidget> {
+  List<Widget> vehicleRowList(List<Future<FeedEntity>> busList) {
+    List<Widget> vehicleRowList = [];
+    for (Future<FeedEntity> entity in widget.busInfo) {
+      vehicleRowList.add(VehicleRow(busInfo: entity));
+    }
+    return vehicleRowList;
+  }
   // final Future<String> busOutput = dart_gtfs.pullClosestBus();
 
   @override
@@ -211,7 +218,10 @@ class _BusWidgetState extends State<BusWidget> {
     return Center(
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[VehicleRow(busInfo: widget.busInfo)]));
+            children: vehicleRowList(widget.busInfo)
+        )
+      );
+            // children: <Widget>[VehicleRow(busInfo: widget.busInfo)]));
   }
 }
 
