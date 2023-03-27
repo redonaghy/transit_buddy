@@ -73,6 +73,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   updateVehicleLists(Future<List<FeedEntity>> futureVehicleList) {
     futureVehicleList.then((value) {
+      vehicleList = [];
+      busMarkerList = [];
       for (FeedEntity vehicle in value) {
         if (vehicle.vehicle.position.latitude != 0 &&
             vehicle.vehicle.position.longitude != 0) {
