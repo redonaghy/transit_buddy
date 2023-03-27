@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   // Future<List<FeedEntity>> futureVehicleList = dart_gtfs.pullClosestBus();
   List<FeedEntity> vehicleList = [];
   List<Marker> mapMarkerList = [];
-  String searchResult = "";
+  String searchResult = "921";
 
   // Pre-populates map with some hard-coded bus stops
   List<Marker> stopMarkerList = [
@@ -101,7 +101,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
 
     // Reads future & populates bus list and marker list
-    updateVehicleLists(dart_gtfs.pullClosestBus());
+    if (searchResult != "") {
+      updateVehicleLists(dart_gtfs.pullVehiclesFromRoute(searchResult));
+    }
 
     // Creates a list of vehicleRow objects to display below
     List<Widget> vehicleRowList = [];
@@ -123,9 +125,14 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () {
               // method to show the search bar
               showSearch(
-                  context: context,
-                  // delegate to customize the search bar
-                  delegate: RouteSearchBar());
+                      context: context,
+                      // delegate to customize the search bar
+                      delegate: RouteSearchBar())
+                  .then(
+                (value) {
+                  searchResult = value;
+                },
+              );
             },
             icon: const Icon(Icons.search),
           )
@@ -162,6 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Column(
               children: vehicleRowList,
+              // children: [Text(searchResult)],
             ),
           ],
         ),
@@ -217,14 +225,12 @@ class _VehicleRowState extends State<VehicleRow> {
 class RouteSearchBar extends SearchDelegate {
   // This is where the list of items (routes) need to go
   List<String> searchTerms = [
-    "Apple",
-    "Banana",
-    "Mango",
-    "Pear",
-    "Watermelons",
-    "Blueberries",
-    "Pineapples",
-    "Strawberries"
+    "921",
+    "63",
+    "21",
+    "74",
+    "901",
+    "902",
   ];
 
   // This one clears the search bar of text when its clicked
