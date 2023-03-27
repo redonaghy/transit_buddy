@@ -49,7 +49,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // Future<List<FeedEntity>> futureVehicleList = dart_gtfs.pullClosestBus();
   List<FeedEntity> vehicleList = [];
-  List<Marker> busMarkerList = [];
+
+  List<Marker> mapMarkerList = [];
 
   // Pre-populates map with some hard-coded bus stops
   List<Marker> stopMarkerList = [
@@ -74,37 +75,20 @@ class _MyHomePageState extends State<MyHomePage> {
   updateVehicleLists(Future<List<FeedEntity>> futureVehicleList) {
     futureVehicleList.then((value) {
       vehicleList = [];
-      busMarkerList = [];
+      mapMarkerList = [];
       for (FeedEntity vehicle in value) {
         if (vehicle.vehicle.position.latitude != 0 &&
             vehicle.vehicle.position.longitude != 0) {
           vehicleList.add(vehicle);
-          stopMarkerList.add(Marker(
+          mapMarkerList.add(Marker(
             builder: (ctx) => const Icon(Icons.bus_alert),
             point: LatLng(vehicle.vehicle.position.latitude,
                 vehicle.vehicle.position.longitude),
           ));
         }
       }
-      // setState(() {});
+      setState(() {});
     });
-  }
-
-  refreshCallback() {
-    Future<List<FeedEntity>> newBus = dart_gtfs.pullClosestBus();
-    newBus.then((value) {
-      setState(() {
-        busMarkerList = [];
-        for (FeedEntity vehicle in value) {
-          busMarkerList.add(Marker(
-            point: LatLng(vehicle.vehicle.position.latitude,
-                vehicle.vehicle.position.longitude),
-            builder: (ctx) => const Icon(Icons.bus_alert),
-          ));
-        }
-      });
-    });
-    setState(() {});
   }
 
   @override
@@ -160,14 +144,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       userAgentPackageName: 'com.example.app',
                     ),
                     MarkerLayer(
-                      markers: stopMarkerList,
+                      markers: mapMarkerList + stopMarkerList,
                     ),
                   ]),
             ),
-            // ListView(
-            //   padding: const EdgeInsets.all(8),
-            //   children: vehicleRowList,
-            // ),
+            Column(
+              children: vehicleRowList,
+            ),
           ],
         ),
       ),
