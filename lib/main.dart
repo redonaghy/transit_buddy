@@ -49,8 +49,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // Future<List<FeedEntity>> futureVehicleList = dart_gtfs.pullClosestBus();
   List<FeedEntity> vehicleList = [];
-
   List<Marker> mapMarkerList = [];
+  String searchResult = "";
 
   // Pre-populates map with some hard-coded bus stops
   List<Marker> stopMarkerList = [
@@ -286,6 +286,9 @@ class RouteSearchBar extends SearchDelegate {
         var result = matchQuery[index];
         return ListTile(
           title: Text(result),
+          onTap: () {
+            close(context, result);
+          },
         );
       },
     );
