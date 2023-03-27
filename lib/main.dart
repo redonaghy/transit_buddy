@@ -118,6 +118,18 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            onPressed: () {
+              // method to show the search bar
+              showSearch(
+                  context: context,
+                  // delegate to customize the search bar
+                  delegate: RouteSearchBar());
+            },
+            icon: const Icon(Icons.search),
+          )
+        ],
       ),
       body: Center(
         child: Column(
@@ -202,7 +214,7 @@ class _VehicleRowState extends State<VehicleRow> {
 }
 
 // This creates the search bar!
-class SearchBar extends SearchDelegate {
+class RouteSearchBar extends SearchDelegate {
   // This is where the list of items (routes) need to go
   List<String> searchTerms = [
     "Apple",
