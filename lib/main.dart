@@ -47,7 +47,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Future<List<FeedEntity>> busesList = dart_gtfs.pullClosestBus();
+  // Future<List<FeedEntity>> futureVehicleList = dart_gtfs.pullClosestBus();
+  List<FeedEntity> vehicleList = [];
+  List<Marker> busMarkerList = [];
+
   // Pre-populates map with some hard-coded bus stops
   List<Marker> stopMarkerList = [
     Marker(
@@ -68,7 +71,22 @@ class _MyHomePageState extends State<MyHomePage> {
     ),
   ];
 
-  List<Marker> busMarkerList = [];
+  updateVehicleLists(Future<List<FeedEntity>> futureVehicleList) {
+    futureVehicleList.then((value) {
+      for (FeedEntity vehicle in value) {
+        if (vehicle.vehicle.position.latitude != 0 &&
+            vehicle.vehicle.position.longitude != 0) {
+          vehicleList.add(vehicle);
+          stopMarkerList.add(Marker(
+            builder: (ctx) => const Icon(Icons.bus_alert),
+            point: LatLng(vehicle.vehicle.position.latitude,
+                vehicle.vehicle.position.longitude),
+          ));
+        }
+      }
+      // setState(() {});
+    });
+  }
 
   refreshCallback() {
     Future<List<FeedEntity>> newBus = dart_gtfs.pullClosestBus();
@@ -96,44 +114,27 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
 
-    // If pullClosestBus() http request is complete, add marker for that bus
-    busesList.then((value) {
-      for (FeedEntity vehicle in value) {
-        stopMarkerList.add(Marker(
-          builder: (ctx) => const Icon(Icons.bus_alert),
-          point: LatLng(vehicle.vehicle.position.latitude,
-              vehicle.vehicle.position.longitude),
-        ));
-      }
-      setState(() {});
-    });
+    // Reads future & populates bus list and marker list
+    updateVehicleLists(dart_gtfs.pullClosestBus());
 
-    // This scaffold that is returned makes up the entire home page; its children
-    // is all the elements in our app like map, text, etc.
+    // Creates a list of vehicleRow objects to display below
+    List<Widget> vehicleRowList = [];
+    if (vehicleList.isNotEmpty) {
+      for (FeedEntity entity in vehicleList) {
+        vehicleRowList.add(VehicleRow(busInfo: entity));
+      }
+    } else {
+      vehicleRowList.add(const Text("No buses found : ("));
+    }
+    debugPrint("vehicleList length: ${vehicleList.length}");
+
+    // Widget code starts here
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
@@ -141,7 +142,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: FlutterMap(
                   options: MapOptions(
                     center: LatLng(44.93804, -93.16838),
-                    zoom: 10,
+                    zoom: 11,
                   ),
                   nonRotatedChildren: [
                     AttributionWidget.defaultWidget(
@@ -156,22 +157,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       subdomains: ['a', 'b', 'c'],
                       userAgentPackageName: 'com.example.app',
                     ),
-                    // This MarkerLayer has a parameter markers that is a list of Markers;
-                    // for now this contains 4 bus stop locations I hard coded in but
-                    // eventually the list will be automatically populated for us using
-                    // GTFS data.
                     MarkerLayer(
-                      // Our markerList is pre-built with bus & stop locations
                       markers: stopMarkerList,
                     ),
                   ]),
             ),
-            // This column contains the BusWidget which handles the
-            // rows with info for incoming buses.
-            Column(
-              children: <Widget>[BusWidget(busInfo: busesList)],
-              mainAxisAlignment: MainAxisAlignment.end,
-            ),
+            // ListView(
+            //   padding: const EdgeInsets.all(8),
+            //   children: vehicleRowList,
+            // ),
           ],
         ),
       ),
@@ -181,59 +175,6 @@ class _MyHomePageState extends State<MyHomePage> {
       //   child: Icon(Icons.refresh),
       // ),
     );
-  }
-}
-
-/*
-This widget is the block at the bottom that holds bus info. Currently, it contains
-one row of info for one bus. It takes one Future<FeedEntity> object and uses it
-to create on VehicleRow widget with the info from that.
-*/
-class BusWidget extends StatefulWidget {
-  const BusWidget({
-    super.key,
-    // This is the String parameter that decided the text in the widget.
-    required this.busInfo,
-  });
-
-  final Future<List<FeedEntity>> busInfo;
-
-  @override
-  State<BusWidget> createState() => _BusWidgetState();
-}
-
-class _BusWidgetState extends State<BusWidget> {
-  late Future<List<FeedEntity>> feedEntityList = widget.busInfo;
-  List<Widget> vehicleRowList(Future<List<FeedEntity>> busList) {
-    List<Widget> vehicleRowList = [];
-    busList.then(
-      (value) {
-        for (FeedEntity entity in value) {
-          vehicleRowList.add(VehicleRow(busInfo: entity));
-        }
-      },
-    );
-    return vehicleRowList;
-  }
-  // List<Widget> vehicleRowList(List<Future<FeedEntity>> busList) {
-  //   List<Widget> vehicleRowList = [];
-  //   for (Future<FeedEntity> entity in widget.busInfo) {
-  //     vehicleRowList.add(VehicleRow(busInfo: entity));
-  //   }
-  //   return vehicleRowList;
-  // }
-  // final Future<String> busOutput = dart_gtfs.pullClosestBus();
-
-  @override
-  Widget build(BuildContext context) {
-    // A FutureBuilder is a widget that displays one widget if there is currently
-    // output from a Future object (our bus data that takes a second to load), and
-    // another widget if there is not (loading icon, for example)
-    return Center(
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: vehicleRowList(widget.busInfo)));
-    // children: <Widget>[VehicleRow(busInfo: widget.busInfo)]));
   }
 }
 
@@ -261,33 +202,12 @@ class _VehicleRowState extends State<VehicleRow> {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      // The Row widget means the bus icon and text are side-by-side
       child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
+          const Padding(
+            padding: EdgeInsets.only(right: 8),
             child: Icon(Icons.bus_alert),
           ),
-          // The future builder builds two different widgets depending on if
-          // the http request for pullClosestBus() has finished. If it hasn't,
-          // it builds text that says "Loading...", and otherwise returns text
-          // with route & distance.
-          // FutureBuilder(
-          //     future: widget.busInfo,
-          //     builder: (context, snapshot) {
-          //       if (snapshot.hasData) {
-          //         LatLng currentLocation = LatLng(44.93994, -93.16715);
-          //         double distanceToBus = DistanceHaversine().as(
-          //                 LengthUnit.Meter,
-          //                 currentLocation,
-          //                 LatLng(snapshot.data!.vehicle.position.latitude,
-          //                     snapshot.data!.vehicle.position.longitude)) /
-          //             1000;
-          //         return Text(
-          //             "Route ${snapshot.data!.vehicle.trip.routeId} - ${distanceToBus} km away");
-          //       } else
-          //         return Text("Loading...");
-          //     }),
           Text(
               "Route ${widget.busInfo.vehicle.trip.routeId} - ${DistanceHaversine().as(LengthUnit.Meter, LatLng(44.93994, -93.16715), LatLng(widget.busInfo.vehicle.position.latitude, widget.busInfo.vehicle.position.longitude)) / 1000} km away"),
         ],
