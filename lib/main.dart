@@ -131,6 +131,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   .then(
                 (value) {
                   searchResult = value;
+                  if (searchResult == "A Line") {
+                    searchResult = "921";
+                  } else if (searchResult == "Blue Line") {
+                    searchResult = "901";
+                  } else if (searchResult == "Green Line") {
+                    searchResult = "902";
+                  }
                 },
               );
             },
@@ -225,12 +232,12 @@ class _VehicleRowState extends State<VehicleRow> {
 class RouteSearchBar extends SearchDelegate {
   // This is where the list of items (routes) need to go
   List<String> searchTerms = [
-    "921",
+    "A Line",
     "63",
     "21",
     "74",
-    "901",
-    "902",
+    "Blue Line",
+    "Green Line",
   ];
 
   // This one clears the search bar of text when its clicked
