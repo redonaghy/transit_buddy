@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
+import 'package:archive/archive.dart';
 
 void main() async {
   // await dart_gtfs.printClosestBus();
@@ -90,23 +91,6 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  refreshCallback() {
-    Future<List<FeedEntity>> newBus = dart_gtfs.pullClosestBus();
-    newBus.then((value) {
-      setState(() {
-        busMarkerList = [];
-        for (FeedEntity vehicle in value) {
-          busMarkerList.add(Marker(
-            point: LatLng(vehicle.vehicle.position.latitude,
-                vehicle.vehicle.position.longitude),
-            builder: (ctx) => const Icon(Icons.bus_alert),
-          ));
-        }
-      });
-    });
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -118,6 +102,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Reads future & populates bus list and marker list
     updateVehicleLists(dart_gtfs.pullClosestBus());
+
+    dart_gtfs.getRoutes();
 
     // Creates a list of vehicleRow objects to display below
     List<Widget> vehicleRowList = [];
