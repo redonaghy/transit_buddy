@@ -149,8 +149,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Container(
-              height: 400,
+            Expanded(
               child: FlutterMap(
                   options: MapOptions(
                     center: LatLng(44.93804, -93.16838),
@@ -173,10 +172,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       markers: mapMarkerList + stopMarkerList,
                     ),
                   ]),
-            ),
-            Column(
-              children: vehicleRowList,
-              // children: [Text(searchResult)],
             ),
           ],
         ),
