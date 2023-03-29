@@ -1,26 +1,23 @@
 import 'dart:io';
+import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 import 'package:http/http.dart' as http;
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:latlong2/latlong.dart';
 
-String vehicleInfoString(FeedEntity entity) {
-  return """Vehicle Information for Vehicle #${entity.vehicle.vehicle.label}
-  Vehicle ID: ${entity.id}
-  Descriptor: ${entity.vehicle.vehicle.label}
-  Route ID : ${entity.vehicle.trip.routeId}
-  Latitude: ${entity.vehicle.position.latitude}
-  Longitude: ${entity.vehicle.position.longitude}
-  Speed: ${entity.vehicle.position.speed}\n\n""";
-}
-
-FeedEntity closestBus(List<FeedEntity> buses) {
-  // FeedEntity closestBus = buses[0];
-  // for(FeedEntity bus in buses) {
-  //   if() {
-  //     closestBus = bus;
-  //   }
-  // }
-  return buses[0];
+void getRoutes() async {
+  final staticFeedUrl = Uri.parse("https://svc.metrotransit.org/mtgtfs/gtfs.zip");
+  final response = await http.get(staticFeedUrl);
+  
+  if (response.statusCode == 200) {
+    final decoder = ZipDecoder();
+    
+    final zip = decoder.decodeBuffer(InputStream(response.bodyBytes));
+    var routes = zip.findFile("routes.txt");
+    if (routes != null && routes.isFile) {
+      print(routes.rawContent);
+    }
+  }
 }
 
 /*

@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
+import 'package:archive/archive.dart';
 
 void main() async {
   // await dart_gtfs.printClosestBus();
@@ -104,6 +105,8 @@ class _MyHomePageState extends State<MyHomePage> {
     if (searchResult != "") {
       updateVehicleLists(dart_gtfs.pullVehiclesFromRoute(searchResult));
     }
+
+    dart_gtfs.getRoutes();
 
     // Creates a list of vehicleRow objects to display below
     List<Widget> vehicleRowList = [];
