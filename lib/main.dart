@@ -177,10 +177,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ]),
             ),
-            Column(
-              children: vehicleRowList,
-              // children: [Text(searchResult)],
-            ),
           ],
         ),
       ),
