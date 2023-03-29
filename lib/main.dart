@@ -50,7 +50,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // Future<List<FeedEntity>> futureVehicleList = dart_gtfs.pullClosestBus();
   List<FeedEntity> vehicleList = [];
-  List<Marker> busMarkerList = [];
+  List<Marker> mapMarkerList = [];
+  String searchResult = "921";
 
   // Pre-populates map with some hard-coded bus stops
   List<Marker> stopMarkerList = [
@@ -75,19 +76,19 @@ class _MyHomePageState extends State<MyHomePage> {
   updateVehicleLists(Future<List<FeedEntity>> futureVehicleList) {
     futureVehicleList.then((value) {
       vehicleList = [];
-      busMarkerList = [];
+      mapMarkerList = [];
       for (FeedEntity vehicle in value) {
         if (vehicle.vehicle.position.latitude != 0 &&
             vehicle.vehicle.position.longitude != 0) {
           vehicleList.add(vehicle);
-          stopMarkerList.add(Marker(
+          mapMarkerList.add(Marker(
             builder: (ctx) => const Icon(Icons.bus_alert),
             point: LatLng(vehicle.vehicle.position.latitude,
                 vehicle.vehicle.position.longitude),
           ));
         }
       }
-      // setState(() {});
+      setState(() {});
     });
   }
 
@@ -101,7 +102,9 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
 
     // Reads future & populates bus list and marker list
-    updateVehicleLists(dart_gtfs.pullClosestBus());
+    if (searchResult != "") {
+      updateVehicleLists(dart_gtfs.pullVehiclesFromRoute(searchResult));
+    }
 
     dart_gtfs.getRoutes();
 
@@ -120,6 +123,30 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        actions: [
+          IconButton(
+            onPressed: () {
+              // method to show the search bar
+              showSearch(
+                      context: context,
+                      // delegate to customize the search bar
+                      delegate: RouteSearchBar())
+                  .then(
+                (value) {
+                  searchResult = value;
+                  if (searchResult == "A Line") {
+                    searchResult = "921";
+                  } else if (searchResult == "Blue Line") {
+                    searchResult = "901";
+                  } else if (searchResult == "Green Line") {
+                    searchResult = "902";
+                  }
+                },
+              );
+            },
+            icon: const Icon(Icons.search),
+          )
+        ],
       ),
       body: Center(
         child: Column(
@@ -146,14 +173,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       userAgentPackageName: 'com.example.app',
                     ),
                     MarkerLayer(
-                      markers: stopMarkerList,
+                      markers: mapMarkerList + stopMarkerList,
                     ),
                   ]),
             ),
-            // ListView(
-            //   padding: const EdgeInsets.all(8),
-            //   children: vehicleRowList,
-            // ),
+            Column(
+              children: vehicleRowList,
+              // children: [Text(searchResult)],
+            ),
           ],
         ),
       ),
@@ -200,6 +227,86 @@ class _VehicleRowState extends State<VehicleRow> {
               "Route ${widget.busInfo.vehicle.trip.routeId} - ${DistanceHaversine().as(LengthUnit.Meter, LatLng(44.93994, -93.16715), LatLng(widget.busInfo.vehicle.position.latitude, widget.busInfo.vehicle.position.longitude)) / 1000} km away"),
         ],
       ),
+    );
+  }
+}
+
+// This creates the search bar!
+class RouteSearchBar extends SearchDelegate {
+  // This is where the list of items (routes) need to go
+  List<String> searchTerms = [
+    "A Line",
+    "63",
+    "21",
+    "74",
+    "Blue Line",
+    "Green Line",
+  ];
+
+  // This one clears the search bar of text when its clicked
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        onPressed: () {
+          query = '';
+        },
+        icon: Icon(Icons.clear),
+      ),
+    ];
+  }
+
+  // back arrow to exit search menu :)
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        close(context, null);
+      },
+      icon: Icon(Icons.arrow_back),
+    );
+  }
+
+  // shows query result? still  lil confused by this one
+  @override
+  Widget buildResults(BuildContext context) {
+    List<String> matchQuery = [];
+    for (var route in searchTerms) {
+      if (route.toLowerCase().contains(query.toLowerCase())) {
+        matchQuery.add(route);
+      }
+    }
+    return ListView.builder(
+      itemCount: matchQuery.length,
+      itemBuilder: (context, index) {
+        var result = matchQuery[index];
+        return ListTile(
+          title: Text(result),
+        );
+      },
+    );
+  }
+
+  // this one shows query results while typing!
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    List<String> matchQuery = [];
+    for (var route in searchTerms) {
+      if (route.toLowerCase().contains(query.toLowerCase())) {
+        matchQuery.add(route);
+      }
+    }
+    return ListView.builder(
+      itemCount: matchQuery.length,
+      itemBuilder: (context, index) {
+        var result = matchQuery[index];
+        return ListTile(
+          title: Text(result),
+          onTap: () {
+            close(context, result);
+          },
+        );
+      },
     );
   }
 }
