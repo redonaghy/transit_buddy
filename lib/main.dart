@@ -5,6 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
 import 'package:archive/archive.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 
 void main() async {
   // await dart_gtfs.printClosestBus();
@@ -178,6 +179,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     MarkerLayer(
                       markers: mapMarkerList + stopMarkerList,
+                    ),
+                    CurrentLocationLayer(
+                      style: const LocationMarkerStyle(
+                        marker: DefaultLocationMarker(
+                          child: Icon(
+                            Icons.navigation,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ),
                     ),
                   ]),
             ),

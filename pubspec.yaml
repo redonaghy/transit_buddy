@@ -36,6 +36,7 @@ dependencies:
   gtfs_realtime_bindings: ^1.0.1
   http: ^0.13.5
   archive: ^3.3.6
+  flutter_map_location_marker: ^5.2.1
 
 
   # The following adds the Cupertino Icons font to your application.
