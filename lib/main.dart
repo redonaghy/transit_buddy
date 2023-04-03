@@ -135,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       context: context,
                       // delegate to customize the search bar
                       delegate: RouteSearchBar())
-                  .then(    
+                  .then(
                 (value) {
                   if (value != null) {
                     searchResult = value;
@@ -195,11 +195,6 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      // floatingActionButton: const FloatingActionButton(
-      //   onPressed:() => ,
-      //   tooltip: 'Refresh',
-      //   child: Icon(Icons.refresh),
-      // ),
     );
   }
 }
