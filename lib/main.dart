@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         // This is the theme of your application.
         primarySwatch: Colors.red,
       ),
-      home: const MyHomePage(title: 'Transit Buddy =) Home Page'),
+      home: const MyHomePage(title: ''),
     );
   }
 }
@@ -121,7 +121,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Widget code starts here
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Text(widget.title),
         actions: [
           IconButton(
