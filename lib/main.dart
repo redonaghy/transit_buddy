@@ -127,27 +127,29 @@ class _MyHomePageState extends State<MyHomePage> {
         elevation: 0,
         title: Text(widget.title),
         actions: [
-          IconButton(
+          TextButton(
             onPressed: () {
               // method to show the search bar
               showSearch(
                       context: context,
                       // delegate to customize the search bar
                       delegate: RouteSearchBar())
-                  .then(
+                  .then(    
                 (value) {
-                  searchResult = value;
-                  if (searchResult == "A Line") {
-                    searchResult = "921";
-                  } else if (searchResult == "Blue Line") {
-                    searchResult = "901";
-                  } else if (searchResult == "Green Line") {
-                    searchResult = "902";
+                  if (value != null) {
+                    searchResult = value;
+                    if (searchResult == "A Line") {
+                      searchResult = "921";
+                    } else if (searchResult == "Blue Line") {
+                      searchResult = "901";
+                    } else if (searchResult == "Green Line") {
+                      searchResult = "902";
+                    }
                   }
                 },
               );
             },
-            icon: const Icon(Icons.search),
+            child: Text(searchResult),
           )
         ],
       ),
