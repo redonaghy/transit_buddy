@@ -178,7 +178,16 @@ class _MyHomePageState extends State<MyHomePage> {
                     MarkerLayer(
                       markers: mapMarkerList + stopMarkerList,
                     ),
-                    CurrentLocationLayer(),
+                    CurrentLocationLayer(
+                      style: const LocationMarkerStyle(
+                        marker: DefaultLocationMarker(
+                          child: Icon(
+                            Icons.navigation,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ),
+                    ),
                   ]),
             ),
           ],
