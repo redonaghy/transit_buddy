@@ -57,19 +57,19 @@ class _TransitAppState extends State<TransitApp> {
 
     var stopMarkerList = <Marker>[
       Marker(
-        builder: (ctx) => Image.asset('assets/bus-stop.png'),
+        builder: (ctx) => Image.asset('assets/stop-bus.png'),
         point: LatLng(44.940063, -93.167231),
       ),
       Marker(
-        builder: (ctx) => Image.asset('assets/bus-stop.png'),
+        builder: (ctx) => Image.asset('assets/stop-bus.png'),
         point: LatLng(44.940139, -93.167496),
       ),
       Marker(
-        builder: (ctx) => Image.asset('assets/bus-stop.png'),
+        builder: (ctx) => Image.asset('assets/stop-bus.png'),
         point: LatLng(44.939766, -93.167117),
       ),
       Marker(
-        builder: (ctx) => Image.asset('assets/bus-stop.png'),
+        builder: (ctx) => Image.asset('assets/stop-bus.png'),
         point: LatLng(44.939760, -93.166927),
       ),
     ];

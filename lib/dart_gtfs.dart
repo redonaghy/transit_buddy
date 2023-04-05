@@ -27,12 +27,14 @@ Future<List<FeedEntity>> pullVehiclesFromRoute(String route) async {
   List<FeedEntity> buses = [];
   return Future.delayed(const Duration(seconds: 0), () => buses);
 }
+
 /*
 Stream of FeedEntity (vehicle) list that sends out data every 15 seconds
 */
 Stream<List<FeedEntity>> transitStream() async* {
   while (true) {
-    final url = Uri.parse('https://svc.metrotransit.org/mtgtfs/vehiclepositions.pb');
+    final url =
+        Uri.parse('https://svc.metrotransit.org/mtgtfs/vehiclepositions.pb');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final feedMessage = FeedMessage.fromBuffer(response.bodyBytes);
@@ -43,6 +45,28 @@ Stream<List<FeedEntity>> transitStream() async* {
       await Future.delayed(const Duration(seconds: 15));
     }
   }
+}
+
+List<List<String>> parseRoutes() {
+  List<List<String>> staticRouteData = [];
+  File routeMaster = File('lib/routes.txt');
+  List<String> allRouteLines = routeMaster.readAsLinesSync();
+  for (String routeInfo in allRouteLines) {
+    List<String> route = routeInfo.split(",");
+    staticRouteData.add(route);
+  }
+  return staticRouteData;
+}
+
+String getColour(String route, List<List<String>> staticRouteData) {
+  for (List<String> routeInfo in staticRouteData) {
+    if (routeInfo[0] == route) {
+      if (routeInfo[7] != '') {
+        return routeInfo[7];
+      }
+    }
+  }
+  return 'ffffff';
 }
 
 // Left over code from first attempting the HTTP request. Keeping this for now just for educational purposes.
