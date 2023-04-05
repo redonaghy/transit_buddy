@@ -78,42 +78,64 @@ class _TransitAppState extends State<TransitApp> {
     // App interface
     return Scaffold(
       body: Center(
-          child: Container(
-              child: Column(children: [
-        Flexible(
-            child: FlutterMap(
-          options: MapOptions(
-            center: LatLng(44.93804, -93.16838),
-            zoom: 11,
-          ),
-          children: [
-            TileLayer(
-              urlTemplate:
-                  'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
-              subdomains: ['a', 'b', 'c'],
-              userAgentPackageName: 'com.example.app',
-            ),
-            MarkerLayer(markers: vehicleMarkerList + stopMarkerList),
-          ],
-        ))
-      ]))),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showSearch(context: context, delegate: RouteSearchBar()).then(
-            (result) {
-              setState(() {
-                if (result != null) {
-                  route = result;
-                  // Don't know if there's a more elegant way of doing this, but to switch routes I stop and restart the stream :P
-                  streamListener.cancel();
-                  startTransitStream();
-                }
-              });
-            },
-          );
-        },
-        tooltip: 'Search',
-        child: Text(route),
+        child: Container(
+          child: Stack(
+            children:[
+              Flexible(
+                child: FlutterMap(
+                  options: MapOptions(
+                    center: LatLng(44.93804, -93.16838),
+                    zoom: 11,
+                  ),
+                  children: [
+                    TileLayer(
+                      urlTemplate:
+                        'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
+                      subdomains: ['a', 'b', 'c'],
+                      userAgentPackageName: 'com.example.app',
+                    ),
+                    MarkerLayer(
+                      markers: vehicleMarkerList + stopMarkerList
+                    ),
+                  ],
+                )
+              ),
+              Container(
+                alignment: Alignment.topCenter,
+                padding: EdgeInsets.only(top: 55),
+                margin: EdgeInsets.symmetric(horizontal: 10),
+                child: ElevatedButton(
+                  onPressed: () {
+                    showSearch(context: context, delegate: RouteSearchBar()).then(
+                      (result) {
+                        setState(() {
+                          if (result != null) {
+                            route = result;
+                            // Don't know if there's a more elegant way of doing this, but to switch routes I stop and restart the stream :P
+                            streamListener.cancel();
+                            startTransitStream();
+                          }
+                        });
+                      },
+                    );
+                  },
+                  child: Text("Current Route: " + route,
+                    style: TextStyle(
+                      color: Colors.black54,
+                      fontSize: 20
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    alignment: Alignment.centerLeft,
+                    minimumSize: const Size.fromHeight(40),
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25))
+                  )
+                ),
+              )
+            ]
+          )
+        )
       ),
     );
   }
