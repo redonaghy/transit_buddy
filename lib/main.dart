@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
@@ -21,17 +22,18 @@ class _TransitAppState extends State<TransitApp> {
   List<Marker> vehicleMarkerList = [];
   String route = "921";
   bool initRun = true;
+  late StreamSubscription<List<FeedEntity>> streamListener;
 
   @override
   Widget build(BuildContext context) {
-    List<FeedEntity> transitFeed = [];
-
-    void refreshTransitData(List<FeedEntity> inputFeed) {
-      setState(() {
+    // Declares the streamListener and refreshes vehicles based on first event
+    void startTransitStream() {
+      streamListener = dart_gtfs.transitStream().listen((transitFeed) {
+        setState(() {
           debugPrint("Refreshed");
           vehicleList = [];
           vehicleMarkerList = [];
-          for (FeedEntity vehicle in inputFeed) {
+          for (FeedEntity vehicle in transitFeed) {
             if (vehicle.vehicle.trip.routeId == route && vehicle.vehicle.position.latitude != 0 && vehicle.vehicle.position.longitude != 0) {
               vehicleList.add(vehicle);
               vehicleMarkerList.add(Marker(
@@ -41,14 +43,12 @@ class _TransitAppState extends State<TransitApp> {
             }
           }
         });
+      });
     }
-    
+
     // On first build, the app will subscribe to a stream of transit data that refreshes every 15 seconds
     if (initRun) {
-      dart_gtfs.transitStream().listen((inputFeed) {
-        transitFeed = inputFeed;
-        refreshTransitData(inputFeed);
-      });
+      startTransitStream();
       initRun = false;
     }
 
@@ -98,11 +98,14 @@ class _TransitAppState extends State<TransitApp> {
         onPressed: () {
           showSearch(context: context, delegate: RouteSearchBar()).then(
             (result) {
-              if (result != null) {
-                route = result;
-                refreshTransitData(transitFeed);
-              }
-              
+              setState(() {
+                if (result != null) {
+                  route = result;
+                  // Don't know if there's a more elegant way of doing this, but to switch routes I stop and restart the stream :P
+                  streamListener.cancel();
+                  startTransitStream();
+                }
+              });
             },
           );
         },

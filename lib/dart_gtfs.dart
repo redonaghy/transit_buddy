@@ -27,24 +27,9 @@ Future<List<FeedEntity>> pullVehiclesFromRoute(String route) async {
   List<FeedEntity> buses = [];
   return Future.delayed(const Duration(seconds: 0), () => buses);
 }
-
-// class TransitFeed {
-//   TransitFeed() {
-//     Timer.periodic(Duration(seconds: 15), (t) {
-//       final url = Uri.parse('https://svc.metrotransit.org/mtgtfs/vehiclepositions.pb');
-//       final response = await http.get(url);
-//       _controller.sink.add(vehicleList);
-//     });
-//   }
-
-//   var vehicleList;
-
-//   final _controller = StreamController<List<FeedEntity>>();
-
-//   Stream<List<FeedEntity>> get stream =>
-//     _controller.stream;
-// }
-
+/*
+Stream of FeedEntity (vehicle) list that sends out data every 15 seconds
+*/
 Stream<List<FeedEntity>> transitStream() async* {
   while (true) {
     final url = Uri.parse('https://svc.metrotransit.org/mtgtfs/vehiclepositions.pb');
