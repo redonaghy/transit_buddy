@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:transit_buddy_alternate/dart_gtfs.dart' as dart_gtfs;
-import 'package:transit_buddy_alternate/RouteSearchBar.dart';
+import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
+import 'package:transit_buddy/RouteSearchBar.dart';
 
 void main() {
   runApp(MaterialApp(
