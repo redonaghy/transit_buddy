@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
@@ -25,6 +26,38 @@ Future<List<FeedEntity>> pullVehiclesFromRoute(String route) async {
   }
   List<FeedEntity> buses = [];
   return Future.delayed(const Duration(seconds: 0), () => buses);
+}
+
+// class TransitFeed {
+//   TransitFeed() {
+//     Timer.periodic(Duration(seconds: 15), (t) {
+//       final url = Uri.parse('https://svc.metrotransit.org/mtgtfs/vehiclepositions.pb');
+//       final response = await http.get(url);
+//       _controller.sink.add(vehicleList);
+//     });
+//   }
+
+//   var vehicleList;
+
+//   final _controller = StreamController<List<FeedEntity>>();
+
+//   Stream<List<FeedEntity>> get stream =>
+//     _controller.stream;
+// }
+
+Stream<List<FeedEntity>> transitStream() async* {
+  while (true) {
+    final url = Uri.parse('https://svc.metrotransit.org/mtgtfs/vehiclepositions.pb');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final feedMessage = FeedMessage.fromBuffer(response.bodyBytes);
+      yield feedMessage.entity;
+      await Future.delayed(const Duration(seconds: 15));
+    } else {
+      yield <FeedEntity>[];
+      await Future.delayed(const Duration(seconds: 15));
+    }
+  }
 }
 
 // Left over code from first attempting the HTTP request. Keeping this for now just for educational purposes.

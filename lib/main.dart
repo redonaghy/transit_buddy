@@ -24,26 +24,32 @@ class _TransitAppState extends State<TransitApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (initRun) {
-      dart_gtfs.pullVehiclesFromRoute(route).then((value) {
-        setState(() {
+    List<FeedEntity> transitFeed = [];
+
+    void refreshTransitData(List<FeedEntity> inputFeed) {
+      setState(() {
+          debugPrint("Refreshed");
           vehicleList = [];
           vehicleMarkerList = [];
-          for (FeedEntity vehicle in value) {
-            if (vehicle.vehicle.position.latitude != 0 &&
-                vehicle.vehicle.position.longitude != 0) {
+          for (FeedEntity vehicle in inputFeed) {
+            if (vehicle.vehicle.trip.routeId == route && vehicle.vehicle.position.latitude != 0 && vehicle.vehicle.position.longitude != 0) {
               vehicleList.add(vehicle);
               vehicleMarkerList.add(Marker(
                 builder: (ctx) => const Icon(Icons.directions_bus),
-                point: LatLng(vehicle.vehicle.position.latitude,
-                    vehicle.vehicle.position.longitude),
+                point: LatLng(vehicle.vehicle.position.latitude, vehicle.vehicle.position.longitude),
               ));
             }
           }
         });
+    }
+    
+    // On first build, the app will subscribe to a stream of transit data that refreshes every 15 seconds
+    if (initRun) {
+      dart_gtfs.transitStream().listen((inputFeed) {
+        transitFeed = inputFeed;
+        refreshTransitData(inputFeed);
       });
-      // If this is commented then build method will run infinitely
-      // initRun = false;
+      initRun = false;
     }
 
     var stopMarkerList = <Marker>[
@@ -92,9 +98,11 @@ class _TransitAppState extends State<TransitApp> {
         onPressed: () {
           showSearch(context: context, delegate: RouteSearchBar()).then(
             (result) {
-              setState(() {
-                if (result != null) route = result;
-              });
+              if (result != null) {
+                route = result;
+                refreshTransitData(transitFeed);
+              }
+              
             },
           );
         },
