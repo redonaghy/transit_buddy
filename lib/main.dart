@@ -34,11 +34,14 @@ class _TransitAppState extends State<TransitApp> {
           vehicleList = [];
           vehicleMarkerList = [];
           for (FeedEntity vehicle in transitFeed) {
-            if (vehicle.vehicle.trip.routeId == route && vehicle.vehicle.position.latitude != 0 && vehicle.vehicle.position.longitude != 0) {
+            if (vehicle.vehicle.trip.routeId == route &&
+                vehicle.vehicle.position.latitude != 0 &&
+                vehicle.vehicle.position.longitude != 0) {
               vehicleList.add(vehicle);
               vehicleMarkerList.add(Marker(
                 builder: (ctx) => const Icon(Icons.directions_bus),
-                point: LatLng(vehicle.vehicle.position.latitude, vehicle.vehicle.position.longitude),
+                point: LatLng(vehicle.vehicle.position.latitude,
+                    vehicle.vehicle.position.longitude),
               ));
             }
           }
