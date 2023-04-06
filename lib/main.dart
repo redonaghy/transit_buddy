@@ -84,6 +84,7 @@ class _TransitAppState extends State<TransitApp> {
       FlutterMap(
         options: MapOptions(
           center: LatLng(44.93804, -93.16838),
+          maxZoom: 18,
           zoom: 11,
         ),
         children: [
