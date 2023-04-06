@@ -5,6 +5,7 @@ import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
 import 'package:transit_buddy/RouteSearchBar.dart';
+import 'package:transit_buddy/VehicleMarker.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -39,7 +40,9 @@ class _TransitAppState extends State<TransitApp> {
                 vehicle.vehicle.position.longitude != 0) {
               vehicleList.add(vehicle);
               vehicleMarkerList.add(Marker(
-                builder: (ctx) => const Icon(Icons.directions_bus),
+                builder: (ctx) {
+                  return VehicleMarker(angle: vehicle.vehicle.position.bearing);
+                },
                 point: LatLng(vehicle.vehicle.position.latitude,
                     vehicle.vehicle.position.longitude),
               ));
@@ -77,66 +80,52 @@ class _TransitAppState extends State<TransitApp> {
     debugPrint("Rebuilding map");
     // App interface
     return Scaffold(
-      body: Center(
-        child: Container(
-          child: Stack(
-            children:[
-              Flexible(
-                child: FlutterMap(
-                  options: MapOptions(
-                    center: LatLng(44.93804, -93.16838),
-                    zoom: 11,
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                        'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
-                      subdomains: ['a', 'b', 'c'],
-                      userAgentPackageName: 'com.example.app',
-                    ),
-                    MarkerLayer(
-                      markers: vehicleMarkerList + stopMarkerList
-                    ),
-                  ],
-                )
-              ),
-              Container(
-                alignment: Alignment.topCenter,
-                padding: EdgeInsets.only(top: 55),
-                margin: EdgeInsets.symmetric(horizontal: 10),
-                child: ElevatedButton(
-                  onPressed: () {
-                    showSearch(context: context, delegate: RouteSearchBar()).then(
-                      (result) {
-                        setState(() {
-                          if (result != null) {
-                            route = result;
-                            // Don't know if there's a more elegant way of doing this, but to switch routes I stop and restart the stream :P
-                            streamListener.cancel();
-                            startTransitStream();
-                          }
-                        });
-                      },
-                    );
-                  },
-                  child: Text("Current Route: " + route,
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontSize: 20
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    alignment: Alignment.centerLeft,
-                    minimumSize: const Size.fromHeight(40),
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25))
-                  )
-                ),
-              )
-            ]
-          )
-        )
+        body: Stack(children: [
+      FlutterMap(
+        options: MapOptions(
+          center: LatLng(44.93804, -93.16838),
+          zoom: 11,
+        ),
+        children: [
+          TileLayer(
+            urlTemplate: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
+            subdomains: ['a', 'b', 'c'],
+            userAgentPackageName: 'com.example.app',
+          ),
+          MarkerLayer(markers: vehicleMarkerList + stopMarkerList),
+        ],
       ),
-    );
+      Container(
+        alignment: Alignment.topCenter,
+        padding: EdgeInsets.only(top: 55),
+        margin: EdgeInsets.symmetric(horizontal: 10),
+        child: ElevatedButton(
+          onPressed: () {
+            showSearch(context: context, delegate: RouteSearchBar()).then(
+              (result) {
+                setState(() {
+                  if (result != null) {
+                    route = result;
+                    // Don't know if there's a more elegant way of doing this, but to switch routes I stop and restart the stream :P
+                    streamListener.cancel();
+                    startTransitStream();
+                  }
+                });
+              },
+            );
+          },
+          style: ElevatedButton.styleFrom(
+              alignment: Alignment.centerLeft,
+              minimumSize: const Size.fromHeight(40),
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(25))),
+          child: Text(
+            "Current Route: ${route}",
+            style: TextStyle(color: Colors.black54, fontSize: 20),
+          ),
+        ),
+      )
+    ]));
   }
 }
