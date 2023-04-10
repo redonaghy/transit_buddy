@@ -89,8 +89,9 @@ class _TransitAppState extends State<TransitApp> {
           center: LatLng(44.93804, -93.16838),
           maxZoom: 18,
           zoom: 11,
-          rotationThreshold: 180,
-          maxBounds: LatLngBounds(LatLng(45.423272, -93.961313), LatLng(44.595736, -92.668792)),
+          rotationThreshold: 60,
+          maxBounds: LatLngBounds(
+              LatLng(45.423272, -93.961313), LatLng(44.595736, -92.668792)),
           rotationWinGestures: 90,
         ),
         children: [
@@ -108,7 +109,10 @@ class _TransitAppState extends State<TransitApp> {
         margin: EdgeInsets.symmetric(horizontal: 10),
         child: ElevatedButton(
           onPressed: () {
-            showSearch(context: context, delegate: RouteSearchBar(staticDataFetcher)).then(
+            showSearch(
+                    context: context,
+                    delegate: RouteSearchBar(staticDataFetcher))
+                .then(
               (result) {
                 setState(() {
                   if (result != null) {
