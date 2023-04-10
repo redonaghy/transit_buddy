@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:transit_buddy/GtfsData.dart';
 import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
 import 'package:transit_buddy/RouteSearchBar.dart';
 import 'package:transit_buddy/VehicleMarker.dart';
@@ -19,6 +20,7 @@ class TransitApp extends StatefulWidget {
 }
 
 class _TransitAppState extends State<TransitApp> {
+  GtfsData staticDataFetcher = GtfsData();
   List<FeedEntity> vehicleList = [];
   List<Marker> vehicleMarkerList = [];
   String route = "921";
@@ -46,6 +48,7 @@ class _TransitAppState extends State<TransitApp> {
                 point: LatLng(vehicle.vehicle.position.latitude,
                     vehicle.vehicle.position.longitude),
               ));
+              debugPrint("${vehicle.vehicle.position.bearing}");
             }
           }
         });
@@ -86,6 +89,9 @@ class _TransitAppState extends State<TransitApp> {
           center: LatLng(44.93804, -93.16838),
           maxZoom: 18,
           zoom: 11,
+          rotationThreshold: 180,
+          maxBounds: LatLngBounds(LatLng(45.423272, -93.961313), LatLng(44.595736, -92.668792)),
+          rotationWinGestures: 90,
         ),
         children: [
           TileLayer(
@@ -102,7 +108,7 @@ class _TransitAppState extends State<TransitApp> {
         margin: EdgeInsets.symmetric(horizontal: 10),
         child: ElevatedButton(
           onPressed: () {
-            showSearch(context: context, delegate: RouteSearchBar()).then(
+            showSearch(context: context, delegate: RouteSearchBar(staticDataFetcher)).then(
               (result) {
                 setState(() {
                   if (result != null) {
@@ -122,7 +128,7 @@ class _TransitAppState extends State<TransitApp> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25))),
           child: Text(
-            "Current Route: ${route}",
+            "Current Route: ${staticDataFetcher.getName(route)}",
             style: TextStyle(color: Colors.black54, fontSize: 20),
           ),
         ),

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:transit_buddy/GtfsData.dart';
 
 class RouteSearchBar extends SearchDelegate {
+
   // This is where the list of items (routes) need to go
-  List<String> searchTerms = [
-    "A Line",
-    "63",
-    "21",
-    "74",
-    "Blue Line",
-    "Green Line",
-  ];
+  List<String> searchTerms = [];
+  late GtfsData staticData;
+
+  RouteSearchBar(GtfsData inputData) {
+    staticData = inputData;
+    searchTerms = staticData.getRoutes();
+  }
 
   // This one clears the search bar of text when its clicked
   @override
@@ -19,7 +20,7 @@ class RouteSearchBar extends SearchDelegate {
         onPressed: () {
           query = '';
         },
-        icon: Icon(Icons.clear),
+        icon: const Icon(Icons.clear),
       ),
     ];
   }
@@ -49,7 +50,7 @@ class RouteSearchBar extends SearchDelegate {
       itemBuilder: (context, index) {
         var result = matchQuery[index];
         return ListTile(
-          title: Text(result),
+          title: Text(staticData.getName(result)),
         );
       },
     );
@@ -69,15 +70,8 @@ class RouteSearchBar extends SearchDelegate {
       itemBuilder: (context, index) {
         var result = matchQuery[index];
         return ListTile(
-          title: Text(result),
+          title: Text(staticData.getName(result)),
           onTap: () {
-            if (result == "A Line") {
-              result = "921";
-            } else if (result == "Blue Line") {
-              result = "901";
-            } else if (result == "Green Line") {
-              result = "902";
-            }
             close(context, result);
           },
         );

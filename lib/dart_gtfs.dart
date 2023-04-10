@@ -49,7 +49,7 @@ Stream<List<FeedEntity>> transitStream() async* {
 
 List<List<String>> parseRoutes() {
   List<List<String>> staticRouteData = [];
-  File routeMaster = File('lib/routes.txt');
+  File routeMaster = File('routes.txt');
   List<String> allRouteLines = routeMaster.readAsLinesSync();
   for (String routeInfo in allRouteLines) {
     List<String> route = routeInfo.split(",");

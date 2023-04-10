@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
   May change to a stateful widget later so we can modify a marker instead of rebuilding,
   but this is good for now.
 */
+
 class VehicleMarker extends StatelessWidget {
   double angle;
 
