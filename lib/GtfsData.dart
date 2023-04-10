@@ -8,7 +8,7 @@ Class to handle and retrieve static GTFS data
 */
 
 class GtfsData {
-  Map<String, List<String>> routeMap = {};
+  Map<String, List<String>?> routeMap = {};
 
   GtfsData() {
     // Populate routes
@@ -38,9 +38,13 @@ class GtfsData {
   */
   String getName(String routeId) {
     // Is this code unsafe
-    if (routeMap[routeId]![1] == "") {
-      return routeMap[routeId]![2];
+    List<String>? route = routeMap[routeId];
+    if (route == null) {
+      return "";
+    } else if (route[1] == "") {
+      return route[2];
+    } else {
+      return route[1];
     }
-    return routeMap[routeId]![1];
   }
 }
