@@ -12,16 +12,14 @@ class GtfsData {
 
   GtfsData() {
     // Populate routes
-    rootBundle.loadString('assets/routes.txt').then(
-      (value) {
-        List<String> routeMaster = LineSplitter.split(value).toList();
-        for (String line in routeMaster) {
-          var lineArray = line.split(",");
-          print(lineArray.length);
-          routeMap[lineArray[0]] = lineArray.sublist(1);
-        }
+    rootBundle.loadString('assets/routes.txt').then((value) {
+      List<String> routeMaster = LineSplitter.split(value).toList();
+      for (String line in routeMaster) {
+        var lineArray = line.split(",");
+        print(lineArray.length);
+        routeMap[lineArray[0]] = lineArray.sublist(1);
       }
-    );
+    });
   }
 
   /*
@@ -45,5 +43,4 @@ class GtfsData {
     }
     return routeMap[routeId]![1];
   }
-
 }
