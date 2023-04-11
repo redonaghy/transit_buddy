@@ -7,6 +7,7 @@ import 'package:transit_buddy/GtfsData.dart';
 import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
 import 'package:transit_buddy/RouteSearchBar.dart';
 import 'package:transit_buddy/VehicleMarker.dart';
+import 'package:location/location.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -26,6 +27,11 @@ class _TransitAppState extends State<TransitApp> {
   String route = "921";
   bool initRun = true;
   late StreamSubscription<List<FeedEntity>> streamListener;
+  late LocationData _currentPosition;
+  final Location location = new Location();
+  late bool _serviceEnabled;
+  late PermissionStatus _permissionGranted;
+  late LocationData _locationData;
 
   @override
   Widget build(BuildContext context) {
@@ -51,13 +57,47 @@ class _TransitAppState extends State<TransitApp> {
               debugPrint("${vehicle.vehicle.position.bearing}");
             }
           }
+          if(_currentPosition != null) {
+            print(_currentPosition.toString());
+            vehicleMarkerList.add(Marker(
+                builder: (ctx) {
+                  return Icon(Icons.currency_bitcoin);
+                },
+                point: LatLng(_currentPosition.latitude!,
+                    _currentPosition.longitude!),
+            ));
+          }
         });
       });
     }
 
+    void userLocation() async{
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    _currentPosition = await location.getLocation();
+
+    }
     // On first build, the app will subscribe to a stream of transit data that refreshes every 15 seconds
     if (initRun) {
       startTransitStream();
+      userLocation();
       initRun = false;
     }
 
