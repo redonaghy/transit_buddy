@@ -29,17 +29,45 @@ class _TransitAppState extends State<TransitApp> {
   late StreamSubscription<List<FeedEntity>> streamListener;
   late LocationData _currentPosition;
   final Location location = new Location();
+  bool isLocationPresent = false;
   late bool _serviceEnabled;
   late PermissionStatus _permissionGranted;
   late LocationData _locationData;
 
   @override
   Widget build(BuildContext context) {
+
+    // Method to pull userLocation
+    void userLocation() async{
+      // isLocationPresent = false;
+      bool _serviceEnabled;
+      PermissionStatus _permissionGranted;
+
+      _serviceEnabled = await location.serviceEnabled();
+      if (!_serviceEnabled) {
+        _serviceEnabled = await location.requestService();
+        if (!_serviceEnabled) {
+          return;
+        }
+      }
+      _permissionGranted = await location.hasPermission();
+      if (_permissionGranted == PermissionStatus.denied) {
+        _permissionGranted = await location.requestPermission();
+        if (_permissionGranted != PermissionStatus.granted) {
+          return;
+        }
+      }
+
+      isLocationPresent = true;
+      _currentPosition = await location.getLocation();
+    }
+
     // Declares the streamListener and refreshes vehicles based on first event
     void startTransitStream() {
       streamListener = dart_gtfs.transitStream().listen((transitFeed) {
         setState(() {
           debugPrint("Refreshed");
+          userLocation();
           vehicleList = [];
           vehicleMarkerList = [];
           for (FeedEntity vehicle in transitFeed) {
@@ -57,11 +85,12 @@ class _TransitAppState extends State<TransitApp> {
               debugPrint("${vehicle.vehicle.position.bearing}");
             }
           }
-          if(_currentPosition != null) {
+          // This is problematic. _currentPosition is a non-nullable type and we cannot check if it is initialized.
+          if(isLocationPresent) {
             print(_currentPosition.toString());
             vehicleMarkerList.add(Marker(
                 builder: (ctx) {
-                  return Icon(Icons.currency_bitcoin);
+                  return Icon(Icons.my_location);
                 },
                 point: LatLng(_currentPosition.latitude!,
                     _currentPosition.longitude!),
@@ -71,29 +100,7 @@ class _TransitAppState extends State<TransitApp> {
       });
     }
 
-    void userLocation() async{
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
 
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
-      }
-    }
-
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
-
-    _currentPosition = await location.getLocation();
-
-    }
     // On first build, the app will subscribe to a stream of transit data that refreshes every 15 seconds
     if (initRun) {
       startTransitStream();
