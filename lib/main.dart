@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:transit_buddy/GtfsData.dart';
+import 'package:transit_buddy/StaticData.dart';
 import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
 import 'package:transit_buddy/RouteSearchBar.dart';
 import 'package:transit_buddy/VehicleMarker.dart';
@@ -21,39 +21,35 @@ class TransitApp extends StatefulWidget {
 }
 
 class _TransitAppState extends State<TransitApp> {
-  GtfsData staticDataFetcher = GtfsData();
+  StaticData staticDataFetcher = StaticData();
   List<FeedEntity> vehicleList = [];
   List<Marker> vehicleMarkerList = [];
   String route = "921";
   bool initRun = true;
   late StreamSubscription<List<FeedEntity>> streamListener;
   late LocationData _currentPosition;
-  final Location location = new Location();
+  final Location location = Location();
   bool isLocationPresent = false;
-  late bool _serviceEnabled;
-  late PermissionStatus _permissionGranted;
-  late LocationData _locationData;
 
   @override
   Widget build(BuildContext context) {
 
     // Method to pull userLocation
-    void userLocation() async{
-      // isLocationPresent = false;
-      bool _serviceEnabled;
-      PermissionStatus _permissionGranted;
+    void userLocation() async {
+      bool locationServiceEnabled;
+      PermissionStatus locationPermissionGranted;
 
-      _serviceEnabled = await location.serviceEnabled();
-      if (!_serviceEnabled) {
-        _serviceEnabled = await location.requestService();
-        if (!_serviceEnabled) {
+      locationServiceEnabled = await location.serviceEnabled();
+      if (!locationServiceEnabled) {
+        locationServiceEnabled = await location.requestService();
+        if (!locationServiceEnabled) {
           return;
         }
       }
-      _permissionGranted = await location.hasPermission();
-      if (_permissionGranted == PermissionStatus.denied) {
-        _permissionGranted = await location.requestPermission();
-        if (_permissionGranted != PermissionStatus.granted) {
+      locationPermissionGranted = await location.hasPermission();
+      if (locationPermissionGranted == PermissionStatus.denied) {
+        locationPermissionGranted = await location.requestPermission();
+        if (locationPermissionGranted != PermissionStatus.granted) {
           return;
         }
       }
@@ -82,13 +78,11 @@ class _TransitAppState extends State<TransitApp> {
                 point: LatLng(vehicle.vehicle.position.latitude,
                     vehicle.vehicle.position.longitude),
               ));
-              debugPrint("${vehicle.vehicle.position.bearing}");
             }
           }
-          // This is problematic. _currentPosition is a non-nullable type and we cannot check if it is initialized.
-          if(isLocationPresent) {
-            print(_currentPosition.toString());
-            vehicleMarkerList.add(Marker(
+          
+          if (isLocationPresent) {
+            vehicleMarkerList.add( Marker(
                 builder: (ctx) {
                   return Icon(Icons.my_location);
                 },
@@ -108,6 +102,7 @@ class _TransitAppState extends State<TransitApp> {
       initRun = false;
     }
 
+    // ! change to static parsed data at some point
     var stopMarkerList = <Marker>[
       Marker(
         builder: (ctx) => Image.asset('assets/stop-bus.png'),
@@ -127,7 +122,6 @@ class _TransitAppState extends State<TransitApp> {
       ),
     ];
 
-    debugPrint("Rebuilding map");
     // App interface
     return Scaffold(
         body: Stack(children: [
@@ -144,7 +138,6 @@ class _TransitAppState extends State<TransitApp> {
         children: [
           TileLayer(
             urlTemplate: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
-            subdomains: ['a', 'b', 'c'],
             userAgentPackageName: 'com.example.app',
           ),
           MarkerLayer(markers: vehicleMarkerList + stopMarkerList),
@@ -164,7 +157,6 @@ class _TransitAppState extends State<TransitApp> {
                 setState(() {
                   if (result != null) {
                     route = result;
-                    // Don't know if there's a more elegant way of doing this, but to switch routes I stop and restart the stream :P
                     streamListener.cancel();
                     startTransitStream();
                   }

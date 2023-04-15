@@ -7,7 +7,7 @@ import 'package:flutter/services.dart' show rootBundle;
 Class to handle and retrieve static GTFS data
 */
 
-class GtfsData {
+class StaticData {
   Map<String, List<String>?> routeMap = {};
 
   GtfsData() {

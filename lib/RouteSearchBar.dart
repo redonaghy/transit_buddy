@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:transit_buddy/GtfsData.dart';
+import 'package:transit_buddy/StaticData.dart';
 
 class RouteSearchBar extends SearchDelegate {
 
   // This is where the list of items (routes) need to go
   List<String> searchTerms = [];
-  late GtfsData staticData;
+  late StaticData staticData;
 
-  RouteSearchBar(GtfsData inputData) {
+  RouteSearchBar(StaticData inputData) {
     staticData = inputData;
     searchTerms = staticData.getRoutes();
   }
