@@ -54,8 +54,10 @@ class _TransitAppState extends State<TransitApp> {
         }
       }
 
-      isLocationPresent = true;
-      _currentPosition = await location.getLocation();
+      location.getLocation().then((value) {
+        _currentPosition = value;
+        isLocationPresent = true;   
+      });
     }
 
     // Declares the streamListener and refreshes vehicles based on first event
