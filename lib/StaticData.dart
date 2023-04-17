@@ -10,7 +10,7 @@ Class to handle and retrieve static GTFS data
 class StaticData {
   Map<String, List<String>?> routeMap = {};
 
-  GtfsData() {
+  StaticData() {
     // Populate routes
     rootBundle.loadString('assets/routes.txt').then((value) {
       List<String> routeMaster = LineSplitter.split(value).toList();
