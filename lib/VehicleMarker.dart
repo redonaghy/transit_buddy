@@ -2,7 +2,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 /*
-  Graphical element of our vehicle markers; contains bus icon and directional arrow
+  Graphical element of the vehicle markers placed on the map.
+  Contains bus icon and directional arrow
   May change to a stateful widget later so we can modify a marker instead of rebuilding,
   but this is good for now.
 */
