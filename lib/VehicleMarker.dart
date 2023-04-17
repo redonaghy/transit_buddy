@@ -20,7 +20,11 @@ class VehicleMarker extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Icon(Icons.directions_bus, size: IconThemeData.fallback().size! * 0.85),
+        Icon(
+          Icons.directions_bus,
+          size: IconThemeData.fallback().size! * 0.85,
+          color: Color(0xFF7CD2CC),
+        ),
         Transform.rotate(
           // Degrees to radian
           angle: angle * math.pi / 180.0,
