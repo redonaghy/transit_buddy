@@ -24,7 +24,7 @@ class VehicleMarker extends StatelessWidget {
         Icon(
           Icons.directions_bus,
           size: IconThemeData.fallback().size! * 0.85,
-          color: Color(0xFF7CD2CC),
+          color: Color.fromARGB(255, 0, 0, 0),
         ),
         Transform.rotate(
           // Degrees to radian
