@@ -9,7 +9,6 @@ import 'package:transit_buddy/StaticData.dart';
 import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
 import 'package:transit_buddy/RouteSearchBar.dart';
 import 'package:transit_buddy/VehicleMarker.dart';
-import 'package:location/location.dart';
 
 void main() async {
 
@@ -36,15 +35,6 @@ class _TransitAppState extends State<TransitApp> {
   List<Marker> vehicleMarkerList = [];
   String route = "921";
   late StreamSubscription<List<FeedEntity>> streamListener;
-  late LocationData _currentPosition;
-  final Location location = Location();
-  bool isLocationPresent = false;
-
-  Future<void> completeLocationRequest() async {
-    if (await Geolocator.checkPermission() == LocationPermission.denied) {
-      await Geolocator.requestPermission();
-    }
-  }
 
   // Declares the streamListener and refreshes vehicles based on first event
   void startTransitStream() {
@@ -67,7 +57,6 @@ class _TransitAppState extends State<TransitApp> {
             ));
           }
         }
-        debugPrint("${vehicleMarkerList.length}");
       });
     });
   }
@@ -80,32 +69,6 @@ class _TransitAppState extends State<TransitApp> {
 
   @override
   Widget build(BuildContext context) {
-
-    // Declares the streamListener and refreshes vehicles based on first event
-    void startTransitStream() {
-      streamListener = dart_gtfs.transitStream().listen((transitFeed) {
-        setState(() {
-          debugPrint("Refreshed");
-          // userLocation();
-          vehicleList = [];
-          vehicleMarkerList = [];
-          for (FeedEntity vehicle in transitFeed) {
-            if (vehicle.vehicle.trip.routeId == route &&
-                vehicle.vehicle.position.latitude != 0 &&
-                vehicle.vehicle.position.longitude != 0) {
-              vehicleList.add(vehicle);
-              vehicleMarkerList.add(Marker(
-                builder: (ctx) {
-                  return VehicleMarker(angle: vehicle.vehicle.position.bearing);
-                },
-                point: LatLng(vehicle.vehicle.position.latitude,
-                    vehicle.vehicle.position.longitude),
-              ));
-            }
-          }
-        });
-      });
-    }
 
     // ! change to static parsed data at some point
     var stopMarkerList = <Marker>[
@@ -171,11 +134,13 @@ class _TransitAppState extends State<TransitApp> {
               );
             },
             style: ElevatedButton.styleFrom(
-                alignment: Alignment.centerLeft,
-                minimumSize: const Size.fromHeight(40),
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25))),
+              alignment: Alignment.centerLeft,
+              minimumSize: const Size.fromHeight(40),
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(25)
+              )
+            ),
             child: Text(
               "Current Route: ${staticDataFetcher.getName(route)}",
               style: TextStyle(color: Colors.black54, fontSize: 20),
