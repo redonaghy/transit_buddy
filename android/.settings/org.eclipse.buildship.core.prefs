@@ -1,11 +1,11 @@
-arguments=--init-script /var/folders/xh/kslr_htj4fx0t2_njr464b5sp2b6g1/T/d146c9752a26f79b52047fb6dc6ed385d064e120494f96f08ca63a317c41f94c.gradle --init-script /var/folders/xh/kslr_htj4fx0t2_njr464b5sp2b6g1/T/52cde0cfcf3e28b8b7510e992210d9614505e0911af0c190bd590d7158574963.gradle
+arguments=--init-script C\:\\Users\\emydi\\AppData\\Roaming\\Code\\User\\globalStorage\\redhat.java\\1.17.0\\config_win\\org.eclipse.osgi\\53\\0\\.cp\\gradle\\init\\init.gradle --init-script C\:\\Users\\emydi\\AppData\\Roaming\\Code\\User\\globalStorage\\redhat.java\\1.17.0\\config_win\\org.eclipse.osgi\\53\\0\\.cp\\gradle\\protobuf\\init.gradle
 auto.sync=false
 build.scans.enabled=false
-connection.gradle.distribution=GRADLE_DISTRIBUTION(WRAPPER)
+connection.gradle.distribution=GRADLE_DISTRIBUTION(VERSION(7.4.2))
 connection.project.dir=
 eclipse.preferences.version=1
 gradle.user.home=
-java.home=/Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+java.home=C\:/Program Files/Eclipse Adoptium/jdk-17.0.2.8-hotspot
 jvm.arguments=
 offline.mode=false
 override.workspace.settings=true
