@@ -36,7 +36,8 @@ class StaticData {
     // shapes!
     rootBundle.loadString('assets/shapes.txt').then((value) {
       List<String> tripMaster = LineSplitter.split(value).toList();
-      String curShapeId = '';
+      String curShapeId =
+          'initialising'; // adds an initialisation entry to be removed later
       for (String line in tripMaster) {
         var lineArray = line.split(",");
         List<List<String>> newShape = [];
@@ -48,8 +49,8 @@ class StaticData {
         } else {
           newShape.add(lineArray.sublist(1));
         }
-
-        // tripMap[lineArray[2]] = lineArray;
+        shapeMap.remove(
+            'initialising'); // removes that first placeholder/initialisation entry
       }
     });
   }
