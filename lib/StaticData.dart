@@ -9,6 +9,8 @@ Class to handle and retrieve static GTFS data
 
 class StaticData {
   Map<String, List<String>?> routeMap = {};
+  Map<String, List<String>> tripMap = {};
+  Map<String, List<List<String>>> shapeMap = {};
 
   StaticData() {
     // Populate routes
@@ -18,6 +20,36 @@ class StaticData {
         var lineArray = line.split(",");
         print(lineArray.length);
         routeMap[lineArray[0]] = lineArray.sublist(1);
+      }
+    });
+    // Populate trips
+    rootBundle.loadString('assets/trips.txt').then((value) {
+      List<String> tripMaster = LineSplitter.split(value).toList();
+      for (String line in tripMaster) {
+        var lineArray = line.split(",");
+        print(lineArray.length);
+        tripMap[lineArray[2]] =
+            lineArray; // index 2 has trip id which is unique - route ids are not unique in this file
+        // also, shape id is index 7
+      }
+    });
+    // shapes!
+    rootBundle.loadString('assets/shapes.txt').then((value) {
+      List<String> tripMaster = LineSplitter.split(value).toList();
+      String curShapeId = '';
+      for (String line in tripMaster) {
+        var lineArray = line.split(",");
+        List<List<String>> newShape = [];
+        if (curShapeId != lineArray[0]) {
+          shapeMap[curShapeId] = newShape;
+          newShape = [];
+          curShapeId = lineArray[0];
+          newShape.add(lineArray.sublist(1));
+        } else {
+          newShape.add(lineArray.sublist(1));
+        }
+
+        // tripMap[lineArray[2]] = lineArray;
       }
     });
   }
