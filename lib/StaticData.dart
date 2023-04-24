@@ -5,11 +5,11 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:latlong2/latlong.dart';
 
-class ShapeData {
+class RouteNode {
   late LatLng ll;
   String order = "";
 
-  ShapeData(String la, String lo, String or) {
+  RouteNode(String la, String lo, String or) {
     ll = LatLng(double.parse(la), double.parse(lo));
     order = or;
   }
@@ -22,7 +22,7 @@ Class to handle and retrieve static GTFS data
 class StaticData {
   Map<String, List<String>?> routeMap = {};
   Map<String, List<String>> tripMap = {};
-  Map<String, ShapeData> shapeMap = {};
+  Map<String, List<RouteNode>> shapeMap = {};
 
   StaticData() {
     // Populate routes
@@ -50,13 +50,17 @@ class StaticData {
       List<String> tripMaster = LineSplitter.split(value).toList();
       // String curShapeId =
           // 'initialising'; // adds an initialisation entry to be removed later
-      for (String line in tripMaster) {
-        var lineArray = line.split(",");
-        ShapeData newShape = ShapeData(lineArray[1], lineArray[2], lineArray[3]);
-        shapeMap[lineArray[0]] = newShape;
+      for (int i = 1; i < tripMaster.length; i++) {
+        var lineArray = tripMaster[i].split(",");
+        RouteNode newShape = RouteNode(lineArray[1], lineArray[2], lineArray[3]);
+        shapeMap[lineArray[0]] ??= [];
+        shapeMap[lineArray[0]]?.add(newShape);
+      }
+      // for (String line in tripMaster) {
+        // var lineArray = line.split(",");
         // shapeMap.remove(
             // 'initialising'); // removes that first placeholder/initialisation entry
-      }
+      // }
     });
   }
 
