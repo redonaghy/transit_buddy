@@ -2,6 +2,18 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:collection';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
+import 'package:latlong2/latlong.dart';
+
+class ShapeData {
+  late LatLng ll;
+  String order = "";
+
+  ShapeData(String la, String lo, String or) {
+    ll = LatLng(double.parse(la), double.parse(lo));
+    order = or;
+  }
+}
 
 /*
 Class to handle and retrieve static GTFS data
@@ -10,7 +22,7 @@ Class to handle and retrieve static GTFS data
 class StaticData {
   Map<String, List<String>?> routeMap = {};
   Map<String, List<String>> tripMap = {};
-  Map<String, List<List<String>>> shapeMap = {};
+  Map<String, ShapeData> shapeMap = {};
 
   StaticData() {
     // Populate routes
@@ -36,21 +48,14 @@ class StaticData {
     // shapes!
     rootBundle.loadString('assets/shapes.txt').then((value) {
       List<String> tripMaster = LineSplitter.split(value).toList();
-      String curShapeId =
-          'initialising'; // adds an initialisation entry to be removed later
+      // String curShapeId =
+          // 'initialising'; // adds an initialisation entry to be removed later
       for (String line in tripMaster) {
         var lineArray = line.split(",");
-        List<List<String>> newShape = [];
-        if (curShapeId != lineArray[0]) {
-          shapeMap[curShapeId] = newShape;
-          newShape = [];
-          curShapeId = lineArray[0];
-          newShape.add(lineArray.sublist(1));
-        } else {
-          newShape.add(lineArray.sublist(1));
-        }
-        shapeMap.remove(
-            'initialising'); // removes that first placeholder/initialisation entry
+        ShapeData newShape = ShapeData(lineArray[1], lineArray[2], lineArray[3]);
+        shapeMap[lineArray[0]] = newShape;
+        // shapeMap.remove(
+            // 'initialising'); // removes that first placeholder/initialisation entry
       }
     });
   }
