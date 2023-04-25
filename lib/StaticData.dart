@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:collection';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter_map/flutter_map.dart';
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -22,7 +24,7 @@ Class to handle and retrieve static GTFS data
 class StaticData {
   Map<String, List<String>?> routeMap = {};
   Map<String, List<String>> tripMap = {};
-  Map<String, List<RouteNode>> shapeMap = {};
+  Map<String, List<LatLng>> shapeMap = {};
 
   StaticData() {
     // Populate routes
@@ -45,21 +47,18 @@ class StaticData {
         // also, shape id is index 7
       }
     });
-    // shapes!
+    // shapes! Assigns node list to shape id in a dictionary
     rootBundle.loadString('assets/shapes.txt').then((value) {
       List<String> tripMaster = LineSplitter.split(value).toList();
-      // String curShapeId =
-          // 'initialising'; // adds an initialisation entry to be removed later
       for (int i = 1; i < tripMaster.length; i++) {
         var lineArray = tripMaster[i].split(",");
-        RouteNode newShape = RouteNode(lineArray[1], lineArray[2], lineArray[3]);
+        LatLng newNode =
+            LatLng(double.parse(lineArray[1]), double.parse(lineArray[2]));
+        // RouteNode newShape =
+        // RouteNode(lineArray[1], lineArray[2], lineArray[3]);
         shapeMap[lineArray[0]] ??= [];
-        shapeMap[lineArray[0]]?.add(newShape);
+        shapeMap[lineArray[0]]?.add(newNode);
       }
-      // for (String line in tripMaster) {
-        // var lineArray = line.split(",");
-        // shapeMap.remove(
-            // 'initialising'); // removes that first placeholder/initialisation entry
       // }
     });
   }
@@ -74,8 +73,16 @@ class StaticData {
     return routeList;
   }
 
+  String? getShapeId(String tripId) {
+    if (tripMap[tripId] != null) {
+      return tripMap[tripId]?[7];
+    } else {
+      return null;
+    }
+  }
+
   /*
-    The special lines only have long names. The regular lines only have short names.
+    The Metro Transit special lines only have long names. The regular lines only have short names.
     This method returns whichever one is not an empty string
   */
   String getName(String routeId) {
@@ -88,5 +95,51 @@ class StaticData {
     } else {
       return route[1];
     }
+  }
+
+  /*
+    Iterates and grabs all trip IDs corresponding to one route ID
+    Trip IDs differ from routes; e.x. for route 21 there are 21A vs 21E which
+    differ in route shape, and then there are weekday vs. weekend trips with
+    different schedules
+  */
+  List<String> getTripsfromRoute(String routeId) {
+    List<String> tripIdList = [];
+    tripMap.forEach((key, value) {
+      if (value[0] == routeId) {
+        tripIdList.add(value[2]);
+      }
+    });
+    return tripIdList;
+  }
+
+  /*
+    Grabs all unique shape IDs from a list of trip IDs; for use when plotting
+    routes on the map without duplicates.
+  */
+  List<String> getUniqueShapesFromTrips(List<String> tripIdList) {
+    List<String> shapeIdList = [];
+    for (String tripId in tripIdList) {
+      // IDs in tripIdList are gotten from tripMap, so they should be filled,
+      // justifying the ?.
+      String currShapeId = tripMap[tripId]![7];
+      if (!shapeIdList.contains(currShapeId)) {
+        shapeIdList.add(currShapeId);
+      }
+    }
+    return shapeIdList;
+  }
+
+  /*
+    Retrieve a PolyLine made up of notes from a shape ID to draw a route
+  */
+  Polyline getPolyLine(String shapeId) {
+    List<LatLng> nodeList = [];
+    if (shapeMap[shapeId] != null) {
+      nodeList = shapeMap[shapeId]!;
+      debugPrint("the thing was not null");
+    }
+    debugPrint("node list length for one polyline: ${nodeList.length}");
+    return Polyline(points: nodeList, strokeWidth: 5, color: Colors.purple);
   }
 }
