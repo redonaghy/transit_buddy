@@ -7,16 +7,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:latlong2/latlong.dart';
 
-class RouteNode {
-  late LatLng ll;
-  String order = "";
-
-  RouteNode(String la, String lo, String or) {
-    ll = LatLng(double.parse(la), double.parse(lo));
-    order = or;
-  }
-}
-
 /*
 Class to handle and retrieve static GTFS data
 */
@@ -41,7 +31,6 @@ class StaticData {
       List<String> tripMaster = LineSplitter.split(value).toList();
       for (String line in tripMaster) {
         var lineArray = line.split(",");
-        print(lineArray.length);
         tripMap[lineArray[2]] =
             lineArray; // index 2 has trip id which is unique - route ids are not unique in this file
         // also, shape id is index 7
@@ -54,8 +43,6 @@ class StaticData {
         var lineArray = tripMaster[i].split(",");
         LatLng newNode =
             LatLng(double.parse(lineArray[1]), double.parse(lineArray[2]));
-        // RouteNode newShape =
-        // RouteNode(lineArray[1], lineArray[2], lineArray[3]);
         shapeMap[lineArray[0]] ??= [];
         shapeMap[lineArray[0]]?.add(newNode);
       }
@@ -114,6 +101,15 @@ class StaticData {
   }
 
   /*
+    Given tripId, returns NB/SB/WB/EB. Because it is a map and it is possible
+    for tripId to be null we make this return a String?, so it will return
+    either those four strings or null.
+  */
+  String? getTripDirection(String tripId) {
+    return tripMap[tripId]?[5];
+  }
+
+  /*
     Grabs all unique shape IDs from a list of trip IDs; for use when plotting
     routes on the map without duplicates.
   */
@@ -137,9 +133,7 @@ class StaticData {
     List<LatLng> nodeList = [];
     if (shapeMap[shapeId] != null) {
       nodeList = shapeMap[shapeId]!;
-      debugPrint("the thing was not null");
     }
-    debugPrint("node list length for one polyline: ${nodeList.length}");
     return Polyline(points: nodeList, strokeWidth: 5, color: Colors.purple);
   }
 }
