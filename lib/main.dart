@@ -11,17 +11,15 @@ import 'package:transit_buddy/RouteSearchBar.dart';
 import 'package:transit_buddy/VehicleMarker.dart';
 
 void main() async {
-
   // Location check before building
   WidgetsFlutterBinding.ensureInitialized();
   if (await Geolocator.checkPermission() == LocationPermission.denied) {
-      await Geolocator.requestPermission();
+    await Geolocator.requestPermission();
   }
 
-  runApp(MaterialApp( 
+  runApp(MaterialApp(
     home: TransitApp(),
   ));
-
 }
 
 class TransitApp extends StatefulWidget {
@@ -33,6 +31,7 @@ class _TransitAppState extends State<TransitApp> {
   StaticData staticDataFetcher = StaticData();
   List<FeedEntity> vehicleList = [];
   List<Marker> vehicleMarkerList = [];
+  List<Polyline> polyLineList = [];
   String route = "921";
   late StreamSubscription<List<FeedEntity>> streamListener;
 
@@ -43,6 +42,10 @@ class _TransitAppState extends State<TransitApp> {
         debugPrint("Refreshed");
         vehicleList = [];
         vehicleMarkerList = [];
+        polyLineList = [];
+        List<String> shapeIdList = [];
+
+        // Per vehicle operations
         for (FeedEntity vehicle in transitFeed) {
           if (vehicle.vehicle.trip.routeId == route &&
               vehicle.vehicle.position.latitude != 0 &&
@@ -55,6 +58,13 @@ class _TransitAppState extends State<TransitApp> {
               point: LatLng(vehicle.vehicle.position.latitude,
                   vehicle.vehicle.position.longitude),
             ));
+            String? vehicleShapeId =
+                staticDataFetcher.getShapeId(vehicle.vehicle.trip.tripId);
+            if (vehicleShapeId != null &&
+                !shapeIdList.contains(vehicle.shape.shapeId)) {
+              shapeIdList.add(vehicleShapeId);
+              polyLineList.add(staticDataFetcher.getPolyLine(vehicleShapeId));
+            }
           }
         }
       });
@@ -69,7 +79,6 @@ class _TransitAppState extends State<TransitApp> {
 
   @override
   Widget build(BuildContext context) {
-
     // ! change to static parsed data at some point
     var stopMarkerList = <Marker>[
       Marker(
@@ -92,7 +101,7 @@ class _TransitAppState extends State<TransitApp> {
 
     // App interface
     return Scaffold(
-      body: Stack(children: [ 
+      body: Stack(children: [
         FlutterMap(
           options: MapOptions(
             center: LatLng(44.93804, -93.16838),
@@ -105,8 +114,25 @@ class _TransitAppState extends State<TransitApp> {
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
+              urlTemplate:
+                  'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.example.app',
+            ),
+            PolylineLayer(
+              polylines:
+                  polyLineList, /*[
+                Polyline(points: [
+                  LatLng(44.961867, -93.292028),
+                  LatLng(44.960990, -93.292670),
+                  LatLng(44.960919, -93.292722),
+                  LatLng(44.960914, -93.293080),
+                  LatLng(44.962534, -93.293076),
+                  LatLng(44.962712, -93.293075),
+                  LatLng(44.962700, -93.291781),
+                  LatLng(44.962701, -93.291417),
+                  LatLng(44.962702, -93.291124),
+                ])
+              ],*/
             ),
             MarkerLayer(markers: vehicleMarkerList + stopMarkerList),
             CurrentLocationLayer(),
@@ -134,13 +160,11 @@ class _TransitAppState extends State<TransitApp> {
               );
             },
             style: ElevatedButton.styleFrom(
-              alignment: Alignment.centerLeft,
-              minimumSize: const Size.fromHeight(40),
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25)
-              )
-            ),
+                alignment: Alignment.centerLeft,
+                minimumSize: const Size.fromHeight(40),
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25))),
             child: Text(
               "Current Route: ${staticDataFetcher.getName(route)}",
               style: TextStyle(color: Colors.black54, fontSize: 20),
