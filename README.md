@@ -1,5 +1,8 @@
-# transit_buddy
+# TRANSIT BUDDy =)
 
-___
+A transit helper for ____________
 
-Transit helper for Macalester Students
+# Development
+
+
+# API
