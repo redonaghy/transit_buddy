@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:transit_buddy/StaticData.dart';
 
+/// Search menu for selecting routes in transit buddy
 class RouteSearchBar extends SearchDelegate {
-
-  // This is where the list of items (routes) need to go
-  List<String> searchTerms = [];
+  List<String> searchTerms = []; // contains routes 
   late StaticData staticData;
 
   RouteSearchBar(StaticData inputData) {
@@ -12,7 +11,7 @@ class RouteSearchBar extends SearchDelegate {
     searchTerms = staticData.getRoutes();
   }
 
-  // This one clears the search bar of text when its clicked
+  /// Clears the search bar of text when its clicked
   @override
   List<Widget>? buildActions(BuildContext context) {
     return [
@@ -25,7 +24,7 @@ class RouteSearchBar extends SearchDelegate {
     ];
   }
 
-  // back arrow to exit search menu :)
+  /// back arrow to exit search menu
   @override
   Widget? buildLeading(BuildContext context) {
     return IconButton(
@@ -36,7 +35,7 @@ class RouteSearchBar extends SearchDelegate {
     );
   }
 
-  // shows query result? still  lil confused by this one
+  /// builds a visual list of search terms for the search menu
   @override
   Widget buildResults(BuildContext context) {
     List<String> matchQuery = [];
@@ -45,6 +44,7 @@ class RouteSearchBar extends SearchDelegate {
         matchQuery.add(route);
       }
     }
+
     return ListView.builder(
       itemCount: matchQuery.length,
       itemBuilder: (context, index) {
@@ -56,7 +56,7 @@ class RouteSearchBar extends SearchDelegate {
     );
   }
 
-  // this one shows query results while typing!
+  /// Filters visual list of current routes based on current user input in search bar
   @override
   Widget buildSuggestions(BuildContext context) {
     List<String> matchQuery = [];

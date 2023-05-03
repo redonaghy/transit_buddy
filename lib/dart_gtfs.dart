@@ -4,9 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:latlong2/latlong.dart';
 
-/*
-Stream of FeedEntity (vehicle) list that sends out data every 15 seconds
-*/
+/// sets up a connection to the gtfs https server and initializes a stream listener 
+/// that pulls from it every 15 seconds.
 Stream<List<FeedEntity>> transitStream() async* {
   while (true) {
     final url =

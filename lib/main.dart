@@ -1,17 +1,22 @@
+// dart
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_map/plugin_api.dart';
-import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:flutter/material.dart'; // material style widgets
+
+// plugins
+import 'package:flutter_map/plugin_api.dart'; // flutter map api package
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart'; // location icon
 import 'package:geolocator/geolocator.dart';
-import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
+import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart'; // read gtfs data
 import 'package:latlong2/latlong.dart';
+
+// our stuff
 import 'package:transit_buddy/StaticData.dart';
 import 'package:transit_buddy/dart_gtfs.dart' as dart_gtfs;
 import 'package:transit_buddy/RouteSearchBar.dart';
 import 'package:transit_buddy/VehicleMarker.dart';
 
 void main() async {
-  // Location check before building
+  // perform location check before building the app to avoid two location checks running at the same time
   WidgetsFlutterBinding.ensureInitialized();
   if (await Geolocator.checkPermission() == LocationPermission.denied) {
     await Geolocator.requestPermission();
@@ -32,32 +37,38 @@ class _TransitAppState extends State<TransitApp> {
   List<FeedEntity> vehicleList = [];
   List<Marker> vehicleMarkerList = [];
   List<Polyline> polyLineList = [];
-  String route = "921";
+  List<String> shapeIdList = [];
+  String route = "921"; // route default on open is the A-Line (921)
   late StreamSubscription<List<FeedEntity>> streamListener;
 
   // Declares the streamListener and refreshes vehicles based on first event
+
+  /// Pulls and reads gtfs feed for the first time and initializes a stream listener 
+  /// that continuously pulls every 15 seconds while the app is running.
   void startTransitStream() {
     streamListener = dart_gtfs.transitStream().listen((transitFeed) {
       setState(() {
-        debugPrint("Refreshed");
-        vehicleList = [];
+        // refresh lists to avoid duplicate data from previous calls.
+        vehicleList = []; 
         vehicleMarkerList = [];
         polyLineList = [];
-        List<String> shapeIdList = [];
+        shapeIdList = [];
 
-        // Per vehicle operations
         for (FeedEntity vehicle in transitFeed) {
-          if (vehicle.vehicle.trip.routeId == route &&
+          if (vehicle.vehicle.trip.routeId == route && // is bus on currently selected route
               vehicle.vehicle.position.latitude != 0 &&
-              vehicle.vehicle.position.longitude != 0) {
+              vehicle.vehicle.position.longitude != 0) { // is bus reporting its location correctly
             vehicleList.add(vehicle);
-            vehicleMarkerList.add(Marker(
-              builder: (ctx) {
-                return VehicleMarker(angle: vehicle.vehicle.position.bearing);
-              },
-              point: LatLng(vehicle.vehicle.position.latitude,
-                  vehicle.vehicle.position.longitude),
-            ));
+            vehicleMarkerList.add(Marker ( // generate map marker for vehicle based on baring and set it to its current pos
+                builder: (ctx) {
+                  return VehicleMarker(angle: vehicle.vehicle.position.bearing);
+                },
+                point: LatLng(vehicle.vehicle.position.latitude,
+                    vehicle.vehicle.position.longitude),
+              )
+            );
+
+            // this will get and draw the current route shape on the map if it isn't there already
             String? vehicleShapeId =
                 staticDataFetcher.getShapeId(vehicle.vehicle.trip.tripId);
             if (vehicleShapeId != null &&
@@ -79,30 +90,13 @@ class _TransitAppState extends State<TransitApp> {
 
   @override
   Widget build(BuildContext context) {
-    // ! change to static parsed data at some point
-    var stopMarkerList = <Marker>[
-      Marker(
-        builder: (ctx) => Image.asset('assets/stop-bus.png'),
-        point: LatLng(44.940063, -93.167231),
-      ),
-      Marker(
-        builder: (ctx) => Image.asset('assets/stop-bus.png'),
-        point: LatLng(44.940139, -93.167496),
-      ),
-      Marker(
-        builder: (ctx) => Image.asset('assets/stop-bus.png'),
-        point: LatLng(44.939766, -93.167117),
-      ),
-      Marker(
-        builder: (ctx) => Image.asset('assets/stop-bus.png'),
-        point: LatLng(44.939760, -93.166927),
-      ),
-    ];
+    List<Marker> stopMarkerList = [];
 
     // App interface
     return Scaffold(
       body: Stack(children: [
-        FlutterMap(
+
+        FlutterMap (
           options: MapOptions(
             center: LatLng(44.93804, -93.16838),
             maxZoom: 18,
@@ -113,43 +107,33 @@ class _TransitAppState extends State<TransitApp> {
             rotationWinGestures: 90,
           ),
           children: [
-            TileLayer(
+            TileLayer( // shows map tiles
               urlTemplate:
                   'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.example.app',
             ),
-            PolylineLayer(
-              polylines:
-                  polyLineList, /*[
-                Polyline(points: [
-                  LatLng(44.961867, -93.292028),
-                  LatLng(44.960990, -93.292670),
-                  LatLng(44.960919, -93.292722),
-                  LatLng(44.960914, -93.293080),
-                  LatLng(44.962534, -93.293076),
-                  LatLng(44.962712, -93.293075),
-                  LatLng(44.962700, -93.291781),
-                  LatLng(44.962701, -93.291417),
-                  LatLng(44.962702, -93.291124),
-                ])
-              ],*/
+            PolylineLayer( // shows route shapes
+              polylines: polyLineList
             ),
-            MarkerLayer(markers: vehicleMarkerList + stopMarkerList),
-            CurrentLocationLayer(),
+            MarkerLayer( // shows bus and stop markers
+              markers: vehicleMarkerList + stopMarkerList
+            ),
+            CurrentLocationLayer(), // shows location icon
           ],
         ),
-        Container(
+
+        // route selector 
+        Container (
           alignment: Alignment.topCenter,
           padding: EdgeInsets.only(top: 55),
           margin: EdgeInsets.symmetric(horizontal: 10),
           child: ElevatedButton(
-            onPressed: () {
+            onPressed: () { // switches screen to search menu when route selector is pressed
               showSearch(
-                      context: context,
-                      delegate: RouteSearchBar(staticDataFetcher))
-                  .then(
-                (result) {
-                  setState(() {
+                  context: context,
+                  delegate: RouteSearchBar(staticDataFetcher)
+                ).then( (result) {
+                  setState(() { // changes selected route if new route is pressed in search menu
                     if (result != null) {
                       route = result;
                       streamListener.cancel();
