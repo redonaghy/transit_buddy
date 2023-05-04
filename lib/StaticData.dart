@@ -1,13 +1,12 @@
 import 'dart:convert';
-import 'dart:io';
-import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_map/flutter_map.dart';
-import 'package:gtfs_realtime_bindings/gtfs_realtime_bindings.dart';
 import 'package:latlong2/latlong.dart';
 
-/// Class that pulls and parses static data from metro gtfs feeds
+/// A class that contains helper methods for parsing data from gtfs static
+/// feeds which contain info like current routes and their associated trips
+/// and feeds as well as schedules.
 class StaticData {
   // Maps for data from routes.txt, trips.txt, and shapes.txt, formatted as 
   // id -> info
@@ -49,19 +48,31 @@ class StaticData {
   }
 
   /// Returns a list of each route IDs from routes.txt
+  /// 
+  /// Each feed entity has an associated route ID that can be used to identify
+  /// which route the bys is currently on. For example, if a feed entity had 
+  /// the route ID, 921, that would signify that bus is on the A-Line.  
   List<String> getRoutes() {
     var routeList = routeMap.keys.toList();
     routeList.remove("route_id"); // removes example id added from the data so it wont show up in search list
     return routeList;
   }
 
-  /// Sets the shape id of a given trip. Each route has a set of trips, which are
-  /// variations of their routes.
+  /// Gets the shape ID of a given trip. 
+  /// 
+  /// Shape IDs are used to identify which set of coordinates a trip is 
+  /// associated with so a path can be drawn for it. Routes can have multiple
+  /// variations, referred to as trips, and each trip has its own shape ID.
   String? getShapeId(String tripId) {
       return tripMap[tripId]?[7]; // tripId[7] is shape id.
   }
 
-  /// gets the routes long name if present else returns it short name.
+  /// Gets the routes long name if present else returns it short name.
+  /// 
+  /// Most routes do not have a name, and are referred to as their route ID 
+  /// (short name). For example, route 63 is commonly referred to as "the 63." 
+  /// However some special routes, such as route 921, have a long name (here, 
+  /// the A-Line).
   String getName(String routeId) {
     List<String>? route = routeMap[routeId];
     if (route == null) {
@@ -73,38 +84,10 @@ class StaticData {
     }
   }
   
-  /// Returns a list of trip ID's associated with the given route ID
-  List<String> getTripsfromRoute(String routeId) {
-    List<String> tripIdList = [];
-    tripMap.forEach((key, value) {
-      if (value[0] == routeId) {
-        tripIdList.add(value[2]);
-      }
-    });
-    return tripIdList;
-  }
-
-  /// Returns the direction (NB/SB/WB/EB) of a given tripID for use when building 
-  /// vehicle icons.
-  String? getTripDirection(String tripId) {
-    return tripMap[tripId]?[5];
-  }
-
-  /// Grabs all unique shape IDs from a list of trip IDs; for use when plotting
-  /// routes on the map without duplicates.
-  List<String> getUniqueShapesFromTrips(List<String> tripIdList) {
-    List<String> shapeIdList = [];
-    for (String tripId in tripIdList) {
-      String currShapeId = tripMap[tripId]![7];
-      if (!shapeIdList.contains(currShapeId)) {
-        shapeIdList.add(currShapeId);
-      }
-    }
-    return shapeIdList;
-  }
-
   /// Gets the list of lat long coordinates associated with a given shape ID 
-  /// for use when drawing routes on map.
+  /// as a Polyline.
+  /// 
+  /// This can then be drawn on the map to show trip shapes.
   Polyline getPolyLine(String shapeId) {
     List<LatLng> nodeList = [];
     if (shapeMap[shapeId] != null) {

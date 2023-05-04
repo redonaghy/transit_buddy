@@ -16,7 +16,8 @@ import 'package:transit_buddy/RouteSearchBar.dart';
 import 'package:transit_buddy/VehicleMarker.dart';
 
 void main() async {
-  // perform location check before building the app to avoid two location checks running at the same time
+  // perform location check before building the app to avoid two location 
+  // checks running at the same time
   WidgetsFlutterBinding.ensureInitialized();
   if (await Geolocator.checkPermission() == LocationPermission.denied) {
     await Geolocator.requestPermission();
@@ -39,9 +40,9 @@ class _TransitAppState extends State<TransitApp> {
   List<Polyline> polyLineList = [];
   List<String> shapeIdList = [];
   String route = "921"; // route default on open is the A-Line (921)
-  late StreamSubscription<List<FeedEntity>> streamListener;
 
-  // Declares the streamListener and refreshes vehicles based on first event
+  // Gtfs feed reader, declared as late as is this field will be null on initialization
+  late StreamSubscription<List<FeedEntity>> streamListener; 
 
   /// Pulls and reads gtfs feed for the first time and initializes a stream listener 
   /// that continuously pulls every 15 seconds while the app is running.
@@ -108,7 +109,7 @@ class _TransitAppState extends State<TransitApp> {
           ),
           children: [
             TileLayer( // shows map tiles
-              urlTemplate:
+              urlTemplate: // url for map tile images
                   'https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.example.app',
             ),

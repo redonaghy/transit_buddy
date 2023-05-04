@@ -1,7 +1,8 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-// Bus icon with vehicle barring arrow
+/// This class is used to build bus icons with direction arrows that correlate
+/// to the given buses barring by stacking a dynamic arrow on top of a bus icon.
 class VehicleMarker extends StatelessWidget {
   double angle;
 
@@ -15,7 +16,7 @@ class VehicleMarker extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        Icon(
+        Icon (
           Icons.directions_bus,
           size: IconThemeData.fallback().size! * 0.85,
           color: Color.fromARGB(255, 0, 0, 0),

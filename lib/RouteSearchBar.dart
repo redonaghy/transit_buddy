@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:transit_buddy/StaticData.dart';
 
-/// Search menu for selecting routes in transit buddy
+/// Search menu that is entered when user clicks the select route button on the
+/// top of the screen. From this menu, users can search for a route and select
+/// it to change the filter on the map to buses on that route.
 class RouteSearchBar extends SearchDelegate {
   List<String> searchTerms = []; // contains routes 
   late StaticData staticData;
@@ -11,7 +13,6 @@ class RouteSearchBar extends SearchDelegate {
     searchTerms = staticData.getRoutes();
   }
 
-  /// Clears the search bar of text when its clicked
   @override
   List<Widget>? buildActions(BuildContext context) {
     return [
@@ -24,7 +25,7 @@ class RouteSearchBar extends SearchDelegate {
     ];
   }
 
-  /// back arrow to exit search menu
+  /// Back arrow for search menu that returns the user to the main screen
   @override
   Widget? buildLeading(BuildContext context) {
     return IconButton(
@@ -35,7 +36,6 @@ class RouteSearchBar extends SearchDelegate {
     );
   }
 
-  /// builds a visual list of search terms for the search menu
   @override
   Widget buildResults(BuildContext context) {
     List<String> matchQuery = [];
@@ -56,7 +56,6 @@ class RouteSearchBar extends SearchDelegate {
     );
   }
 
-  /// Filters visual list of current routes based on current user input in search bar
   @override
   Widget buildSuggestions(BuildContext context) {
     List<String> matchQuery = [];
