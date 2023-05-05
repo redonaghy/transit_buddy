@@ -93,6 +93,6 @@ class StaticData {
     if (shapeMap[shapeId] != null) {
       nodeList = shapeMap[shapeId]!;
     }
-    return Polyline(points: nodeList, strokeWidth: 5, color: Colors.purple);
+    return Polyline(points: nodeList, strokeWidth: 5, color: Colors.red);
   }
 }
