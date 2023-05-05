@@ -26,5 +26,6 @@ Transit Buddy is a Flutter app; it works on both Android and iOS devices. We get
 - The direction marker for trains is incorrect because they don't have "bearing" in the data (which provides directon data for buses)
 - The METRO Red Line does not have a shape in "shapes.txt" and therefore does not show the route diagram on the map
 - Occasionally, a bus marker will disappear off the map on a 15-sec update and reappear on the next update This is due to momentary lapses in the GTFS data feed for that bus, but it always reappears after a momentary gap!
+- Search Bar currently only supports search by route id. User cannot type 'Metro A line' and must type 920 instead. But as of now all routes with special names show up at the top of the list, making it a smaller issue.
 
 ![A horrifying image of a Satanic Transit Rat straddling a bus that says Weezer](assets/alt_icon.png)
